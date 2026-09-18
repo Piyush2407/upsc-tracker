@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UPSC Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1F2EF; --panel:#FFFFFF; --panel-2:#F7F8F5; --line:#DEDFDA;
+  --ink:#171A1F; --muted:#666E7A;
+  --brass:#8F6210; --brass-soft:#F6E8C8; --on-brass:#FFFFFF;
+  --late:#A33A25; --late-soft:#F8DED8;
+  --ok:#3D6A3B; --ok-soft:#DEEADC;
+  --cool:#2E5A78; --cool-soft:#DCE8F0;
+  --r:10px; --font:'Archivo','Helvetica Neue',Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12151B; --panel:#1A1E26; --panel-2:#1F242D; --line:#2B313B;
+  --ink:#E7E8E4; --muted:#929AA7;
+  --brass:#E3B15C; --brass-soft:#3B3018; --on-brass:#171A1F;
+  --late:#E58268; --late-soft:#3E241C;
+  --ok:#86B582; --ok-soft:#1F2E1E;
+  --cool:#78AECF; --cool-soft:#1B2A35;
+}}
+:root[data-theme="dark"]{
+  --bg:#12151B; --panel:#1A1E26; --panel-2:#1F242D; --line:#2B313B;
+  --ink:#E7E8E4; --muted:#929AA7;
+  --brass:#E3B15C; --brass-soft:#3B3018; --on-brass:#171A1F;
+  --late:#E58268; --late-soft:#3E241C;
+  --ok:#86B582; --ok-soft:#1F2E1E;
+  --cool:#78AECF; --cool-soft:#1B2A35;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.wrap{max-width:1080px;margin:0 auto;padding:18px 16px 90px}
+
+/* header */
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+.top h1{font-size:18px;font-weight:700;margin:0;letter-spacing:-.01em}
+.top .spacer{flex:1}
+.count{display:flex;align-items:baseline;gap:7px}
+.count .n{font-size:26px;font-weight:700;color:var(--brass);letter-spacing:-.02em}
+.count .l{font-size:12px;color:var(--muted)}
+.phase{font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--cool-soft);color:var(--cool)}
+.who{font-size:12px;color:var(--muted);margin:0 0 14px}
+.who button{background:none;border:none;color:var(--brass);cursor:pointer;padding:0;text-decoration:underline}
+
+/* nav */
+nav{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:18px;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{background:none;border:none;border-bottom:2px solid transparent;padding:9px 12px;
+  cursor:pointer;color:var(--muted);font-weight:500;white-space:nowrap}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--brass);font-weight:600}
+nav .badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:9px;
+  background:var(--late-soft);color:var(--late);font-size:11px;font-weight:700;line-height:17px;text-align:center}
+
+/* blocks */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:9px;margin-bottom:20px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:11px 13px}
+.stat .n{font-size:23px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.stat .l{font-size:12px;color:var(--muted);margin-top:1px}
+.stat.alert .n{color:var(--late)}
+.stat.good .n{color:var(--ok)}
+section{margin-bottom:26px}
+h2{font-size:15px;font-weight:600;margin:0 0 3px}
+.hint{font-size:13px;color:var(--muted);margin:0 0 11px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.queue{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.row{display:flex;align-items:center;gap:11px;padding:10px 13px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.row .meta{flex:1;min-width:0}
+.row .t{font-weight:500;overflow-wrap:anywhere}
+.row .s{font-size:12px;color:var(--muted);margin-top:1px}
+.tag{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap}
+.tag.late{background:var(--late-soft);color:var(--late)}
+.tag.due{background:var(--brass-soft);color:var(--brass)}
+.tag.soon{background:var(--panel-2);color:var(--muted);border:1px solid var(--line)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.cool{background:var(--cool-soft);color:var(--cool)}
+
+.btn{border:1px solid var(--line);background:var(--panel-2);color:var(--ink);padding:6px 12px;
+  border-radius:7px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--brass)}
+.btn.primary{background:var(--brass);border-color:var(--brass);color:var(--on-brass);font-weight:600}
+.btn.small{padding:4px 9px;font-size:13px}
+.btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink)}
+.btn.danger:hover{color:var(--late)}
+.btn[aria-pressed="true"]{background:var(--brass-soft);border-color:var(--brass);color:var(--brass);font-weight:600}
+
+form.entry{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.grid{display:grid;gap:10px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f label{font-size:12px;color:var(--muted);font-weight:500}
+.f input,.f select,.f textarea{background:var(--panel-2);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%}
+.f textarea{resize:vertical;min-height:38px}
+.foot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.inline{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:600px}
+th{text-align:left;font-size:12px;font-weight:600;color:var(--muted);padding:9px 12px;
+  border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.num{text-align:right;white-space:nowrap}
+tr.hidden-row td{opacity:.45}
+
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}
+.filters input,.filters select{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 9px}
+.filters input{flex:1;min-width:140px}
+
+.empty{border:1px dashed var(--line);border-radius:var(--r);padding:24px 18px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--ink);font-weight:600;margin-bottom:3px}
+
+.chips{display:flex;gap:4px}
+.chip{width:30px;height:24px;border-radius:6px;border:1px solid var(--line);background:var(--panel-2);
+  color:var(--muted);font-size:11px;font-weight:700;cursor:pointer}
+.chip.done{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.chip.due{background:var(--brass-soft);border-color:var(--brass);color:var(--brass)}
+.chip.late{background:var(--late-soft);border-color:var(--late);color:var(--late)}
+
+/* syllabus heatmap */
+.heat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.heat h3{font-size:13px;margin:0 0 8px;font-weight:600}
+.heatgroup{margin-bottom:13px}
+.heatgroup .gl{font-size:12px;color:var(--muted);margin-bottom:5px}
+.cells{display:flex;flex-wrap:wrap;gap:3px}
+.cell{width:16px;height:16px;border-radius:3px;background:var(--panel-2);border:1px solid var(--line);
+  cursor:pointer;padding:0}
+.cell[data-s="reading"]{background:var(--brass-soft);border-color:var(--brass)}
+.cell[data-s="notes"]{background:var(--cool-soft);border-color:var(--cool)}
+.cell[data-s="revised"]{background:var(--ok);border-color:var(--ok)}
+.cell[data-s="hidden"]{background:repeating-linear-gradient(45deg,var(--panel-2),var(--panel-2) 3px,var(--line) 3px,var(--line) 4px)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;
+  border:1px solid var(--line)}
+
+/* question game */
+.qcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:12px}
+.qnum{font-size:12px;color:var(--muted);margin-bottom:8px}
+.qtext{font-size:18px;font-weight:600;line-height:1.35;margin-bottom:16px}
+.qans{background:var(--panel-2);border-left:3px solid var(--brass);padding:11px 13px;border-radius:0 7px 7px 0;
+  margin-bottom:14px;white-space:pre-wrap}
+.qprog{display:flex;gap:5px;margin-bottom:14px}
+.qdot{width:100%;height:5px;border-radius:3px;background:var(--line)}
+.qdot.ok{background:var(--ok)} .qdot.no{background:var(--late)} .qdot.now{background:var(--brass)}
+
+svg.chart{display:block;width:100%;height:auto}
+.two{display:grid;gap:12px}
+@media(min-width:720px){
+  .two{grid-template-columns:1fr 1fr}
+  .grid.g2{grid-template-columns:repeat(2,1fr)}
+  .grid.g3{grid-template-columns:repeat(3,1fr)}
+  .grid.g4{grid-template-columns:repeat(4,1fr)}
+  .span2{grid-column:span 2}
+}
+.hide{display:none!important}
+.foot-note{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:13px;margin-top:26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>UPSC Command Center</h1>
+    <span class="phase" id="phase"></span>
+    <span class="spacer"></span>
+    <div class="count"><span class="n" id="cdN">—</span><span class="l" id="cdL"></span></div>
+  </header>
+  <p class="who" id="who">Starting up…</p>
+
+  <nav id="nav" role="tablist">
+    <button role="tab" data-v="today" aria-selected="true">Today<span class="badge hide" id="bDue">0</span></button>
+    <button role="tab" data-v="syllabus" aria-selected="false">Syllabus</button>
+    <button role="tab" data-v="revision" aria-selected="false">Revision</button>
+    <button role="tab" data-v="daily" aria-selected="false">Daily log</button>
+    <button role="tab" data-v="answers" aria-selected="false">Answers</button>
+    <button role="tab" data-v="ca" aria-selected="false">Current affairs</button>
+    <button role="tab" data-v="quiz" aria-selected="false">Questions</button>
+    <button role="tab" data-v="progress" aria-selected="false">Progress</button>
+  </nav>
+
+  <main id="main"></main>
+
+  <p class="foot-note" id="footnote"></p>
+</div>
+
+<script>
+// ============================================================
+//  PASTE YOUR FIREBASE CONFIG BETWEEN THE QUOTES BELOW.
+//  SETUP.md walks you through where to find these six values.
+//  Until you fill them in, the app still works — it just saves
+//  to this browser only, with no login and no sync.
+// ============================================================
+window.FIREBASE_CONFIG = {
+  apiKey:            "",
+  authDomain:        "",
+  projectId:         "",
+  storageBucket:     "",
+  messagingSenderId: "",
+  appId:             ""
+};
+
+// ============================================================
+//  YOUR DATES — change these if the exam calendar changes.
+// ============================================================
+window.APP_DATES = {
+  yearEnd:      "2026-12-31",  // first countdown target
+  prelims:      "2027-05-23",  // countdown target after year end
+  mains:        "2027-08-15",  // approximate — update when notified
+  phaseBStart:  "2027-01-15",  // Mains depth  -> Prelims sprint
+  phaseCStart:  "2027-05-24"   // Prelims sprint -> Mains consolidation
+};
+
+</script>
+<script>
+// UPSC CSE Mains syllabus tree — GS1-4, Essay, Sociology I & II.
+// Structure: paper -> subject -> [topics]
+// Safe to edit: add or remove topics as your coverage plan changes.
+window.SYLLABUS = {
+  "GS1": {
+    "Art & Culture": [
+      "Indian art forms — painting, sculpture",
+      "Architecture — temple, Indo-Islamic, colonial",
+      "Performing arts — dance, music, theatre",
+      "Literature through the ages",
+      "Religious movements — Bhakti, Sufi",
+      "Buddhism, Jainism and their art"
+    ],
+    "Modern History": [
+      "1857 revolt and aftermath",
+      "Socio-religious reform movements",
+      "Moderate and Extremist phases",
+      "Gandhian mass movements",
+      "Revolutionary nationalism",
+      "Peasant and tribal movements",
+      "Left, trade union and workers' movements",
+      "Partition and integration of states",
+      "Constitutional developments 1858-1947"
+    ],
+    "World History": [
+      "Industrial Revolution",
+      "French and American revolutions",
+      "Colonisation and decolonisation",
+      "World Wars and interwar years",
+      "Russian and Chinese revolutions",
+      "Cold War and its end",
+      "Political philosophies — capitalism, socialism, fascism"
+    ],
+    "Post-Independence India": [
+      "Nehruvian era and planning",
+      "Linguistic reorganisation of states",
+      "Emergency and after",
+      "Economic reforms 1991",
+      "Foreign policy evolution"
+    ],
+    "Indian Society": [
+      "Salient features of Indian society",
+      "Diversity — religion, language, region",
+      "Role of women and women's organisations",
+      "Population and associated issues",
+      "Poverty and developmental issues",
+      "Urbanisation — problems and remedies",
+      "Globalisation's effects on Indian society",
+      "Communalism, regionalism, secularism",
+      "Social empowerment"
+    ],
+    "Geography — Physical": [
+      "Geomorphology — landforms and processes",
+      "Climatology — atmosphere, monsoon",
+      "Oceanography — currents, salinity",
+      "Biogeography and soils",
+      "Earthquakes, tsunami, volcanism",
+      "Cyclones and extreme weather"
+    ],
+    "Geography — Human & Economic": [
+      "Distribution of key natural resources",
+      "Location factors — industries",
+      "Changes in critical geographical features",
+      "Settlement patterns",
+      "World physical geography"
+    ]
+  },
+  "GS2": {
+    "Polity — Constitution": [
+      "Historical underpinnings and evolution",
+      "Preamble and Basic Structure",
+      "Fundamental Rights",
+      "DPSP and Fundamental Duties",
+      "Amendment process and significant amendments",
+      "Emergency provisions",
+      "Schedules of the Constitution"
+    ],
+    "Polity — Union & States": [
+      "President, Vice-President, PM and Council of Ministers",
+      "Parliament — structure, functioning, privileges",
+      "Parliamentary committees",
+      "Governor, CM and state legislature",
+      "Centre-State relations",
+      "Inter-State Council, Finance Commission",
+      "Federalism — issues and challenges"
+    ],
+    "Polity — Judiciary": [
+      "Supreme Court and High Courts",
+      "Judicial review and judicial activism",
+      "Collegium and judicial appointments",
+      "Tribunals",
+      "Judicial reforms and pendency"
+    ],
+    "Polity — Local & Bodies": [
+      "Panchayati Raj — 73rd Amendment",
+      "Urban local bodies — 74th Amendment",
+      "Constitutional bodies — ECI, UPSC, CAG, FC",
+      "Statutory and regulatory bodies",
+      "Quasi-judicial bodies"
+    ],
+    "Governance": [
+      "Transparency and accountability, RTI",
+      "e-Governance",
+      "Citizens' charters and service delivery",
+      "Civil services in a democracy",
+      "Role of civil society, NGOs, SHGs",
+      "Pressure groups and associations",
+      "Government policies and interventions"
+    ],
+    "Social Justice": [
+      "Welfare schemes for vulnerable sections",
+      "Health — issues and policy",
+      "Education — issues and policy",
+      "Hunger, poverty and nutrition",
+      "Mechanisms for protection of vulnerable sections"
+    ],
+    "International Relations": [
+      "India and its neighbourhood",
+      "Bilateral and regional groupings",
+      "India and the global powers",
+      "Indian diaspora",
+      "International institutions — UN, WTO, IMF",
+      "Effect of global policies on India's interests"
+    ]
+  },
+  "GS3": {
+    "Economy": [
+      "Growth, development and employment",
+      "Inclusive growth and issues",
+      "Government Budgeting",
+      "Fiscal policy and taxation",
+      "Monetary policy, banking, RBI",
+      "Financial markets and capital",
+      "Inflation and price stability",
+      "Planning and NITI Aayog",
+      "External sector — BoP, trade, FDI"
+    ],
+    "Agriculture": [
+      "Cropping patterns and irrigation",
+      "MSP, procurement and PDS",
+      "Food processing and supply chain",
+      "Land reforms",
+      "Agricultural subsidies and marketing",
+      "Animal husbandry and fisheries"
+    ],
+    "Infrastructure & Industry": [
+      "Energy, ports, roads, airports, railways",
+      "Industrial policy and manufacturing",
+      "Investment models — PPP",
+      "MSME sector"
+    ],
+    "Science & Technology": [
+      "Space technology and ISRO",
+      "Biotechnology and genetics",
+      "IT, AI, robotics, computing",
+      "Nanotechnology and new materials",
+      "Defence technology",
+      "Nuclear technology",
+      "Health technology and vaccines",
+      "IPR issues"
+    ],
+    "Environment": [
+      "Biodiversity and conservation",
+      "Climate change — science and negotiation",
+      "Pollution — air, water, solid waste",
+      "Environmental Impact Assessment",
+      "Protected areas and wildlife law",
+      "Environment governance and institutions"
+    ],
+    "Disaster Management": [
+      "Types of disasters and vulnerability",
+      "Disaster risk reduction framework",
+      "NDMA and institutional mechanisms"
+    ],
+    "Security": [
+      "Internal security challenges",
+      "Left-wing extremism",
+      "Terrorism and radicalisation",
+      "Border management",
+      "Cyber security",
+      "Money laundering and organised crime",
+      "Security forces and agencies"
+    ]
+  },
+  "GS4": {
+    "Ethics — Theory": [
+      "Ethics and human interface",
+      "Essence, determinants and consequences",
+      "Dimensions of ethics",
+      "Ethics in private and public relationships",
+      "Human values — lessons from leaders and reformers",
+      "Role of family, society and institutions"
+    ],
+    "Attitude & Aptitude": [
+      "Attitude — content, structure, function",
+      "Influence on thought and behaviour",
+      "Moral and political attitudes",
+      "Social influence and persuasion",
+      "Aptitude and foundational values for civil service",
+      "Integrity, impartiality, objectivity",
+      "Empathy, tolerance, compassion"
+    ],
+    "Emotional Intelligence": [
+      "Concepts and utilities",
+      "Application in administration and governance"
+    ],
+    "Moral Thinkers": [
+      "Indian moral thinkers",
+      "Western moral thinkers",
+      "Contributions to ethics and administration"
+    ],
+    "Public Administration Ethics": [
+      "Status and problems of public service values",
+      "Ethical dilemmas in government",
+      "Laws, rules, regulations as sources of guidance",
+      "Accountability and ethical governance",
+      "Strengthening ethical values",
+      "Corporate governance",
+      "Codes of Ethics and Conduct",
+      "Work culture and citizen's charters"
+    ],
+    "Probity in Governance": [
+      "Concept of public service",
+      "Philosophical basis of governance and probity",
+      "Information sharing and transparency",
+      "RTI, challenges of corruption",
+      "Case studies practice"
+    ]
+  },
+  "Essay": {
+    "Essay Practice": [
+      "Philosophical / abstract essays",
+      "Social issues essays",
+      "Economy and development essays",
+      "Polity and governance essays",
+      "Environment and technology essays",
+      "Quote-based essays"
+    ]
+  },
+  "Sociology I": {
+    "Sociology — The Discipline": [
+      "Modernity and social changes in Europe",
+      "Emergence of sociology",
+      "Scope of the subject and comparison with other social sciences",
+      "Sociology and common sense"
+    ],
+    "Sociology as Science": [
+      "Science, scientific method and critique",
+      "Major theoretical strands of research methodology",
+      "Positivism and its critique",
+      "Fact, value and objectivity",
+      "Non-positivist methodologies"
+    ],
+    "Research Methods and Analysis": [
+      "Qualitative and quantitative methods",
+      "Techniques of data collection",
+      "Variables, sampling, hypothesis",
+      "Reliability and validity"
+    ],
+    "Sociological Thinkers": [
+      "Karl Marx — historical materialism, alienation, class struggle",
+      "Emile Durkheim — division of labour, social fact, suicide, religion",
+      "Max Weber — social action, ideal types, authority, bureaucracy, Protestant ethic",
+      "Talcott Parsons — social system, pattern variables",
+      "Robert K. Merton — latent and manifest functions, reference groups",
+      "Mead — self and identity"
+    ],
+    "Stratification and Mobility": [
+      "Concepts — equality, inequality, hierarchy, exclusion, poverty, deprivation",
+      "Theories of social stratification",
+      "Dimensions — class, status groups, gender, ethnicity, race",
+      "Social mobility — open and closed systems, types, sources and causes"
+    ],
+    "Works and Economic Life": [
+      "Social organisation of work in different types of society",
+      "Formal and informal organisation of work",
+      "Labour and society"
+    ],
+    "Politics and Society": [
+      "Sociological theories of power",
+      "Power elite, bureaucracy, pressure groups, political parties",
+      "Nation, state, citizenship, democracy, civil society, ideology",
+      "Protest, agitation, social movements, collective action, revolution"
+    ],
+    "Religion and Society": [
+      "Sociological theories of religion",
+      "Types — animism, monism, pluralism, sects, cults",
+      "Religion in modern society — religious revivalism, fundamentalism, secularisation"
+    ],
+    "Systems of Kinship": [
+      "Family, household, marriage",
+      "Types and forms of family",
+      "Lineage and descent",
+      "Patriarchy and sexual division of labour",
+      "Contemporary trends"
+    ],
+    "Social Change in Modern Society": [
+      "Sociological theories of social change",
+      "Development and dependency",
+      "Agents of social change",
+      "Education and social change",
+      "Science, technology and social change"
+    ]
+  },
+  "Sociology II": {
+    "Perspectives on Indian Society": [
+      "Indology — G.S. Ghurye",
+      "Structural functionalism — M.N. Srinivas",
+      "Marxist sociology — A.R. Desai",
+      "Ambedkar and the caste question",
+      "Western vs Indological perspectives"
+    ],
+    "Impact of Colonial Rule": [
+      "Social background of Indian nationalism",
+      "Modernisation of Indian tradition",
+      "Protests and movements during colonial period",
+      "Social reforms and colonial construction of tradition"
+    ],
+    "Rural and Agrarian Structure": [
+      "Rural and agrarian social structure",
+      "Agrarian relations in colonial India",
+      "Land reforms and Green Revolution",
+      "Agrarian social structure — evolution",
+      "Rural social transformation"
+    ],
+    "Caste System": [
+      "Perspectives on caste — Ghurye, Dumont, Béteille",
+      "Features of the caste system",
+      "Untouchability — forms and perspectives",
+      "Caste in contemporary India"
+    ],
+    "Tribal Communities": [
+      "Definitional problems and distinguishing features",
+      "Colonial policies and tribes",
+      "Integration vs autonomy — Ghurye-Elwin debate",
+      "Forest rights, Tribal Sub Plan, PVTGs",
+      "Religious change among tribes",
+      "Ethnicity and identity movements"
+    ],
+    "Social Classes in India": [
+      "Agrarian class structure",
+      "Industrial class structure",
+      "Middle classes in India"
+    ],
+    "Systems of Kinship in India": [
+      "Lineage and descent in India",
+      "Types of kinship systems",
+      "Family and marriage in India",
+      "Household dimensions",
+      "Patriarchy, entitlements and sexual division of labour"
+    ],
+    "Religion and Society (India)": [
+      "Religious communities in India",
+      "Problems of religious minorities",
+      "Secularism in India"
+    ],
+    "Visions of Social Change": [
+      "Idea of development planning and mixed economy",
+      "Constitution, law and social change",
+      "Education and social change"
+    ],
+    "Rural and Agrarian Transformation": [
+      "Programmes of rural development",
+      "Green Revolution and social change",
+      "Transformation of rural society",
+      "Land reforms — impact"
+    ],
+    "Industrialisation and Urbanisation": [
+      "Evolution of the modern industry in India",
+      "Growth of the working class",
+      "Informal sector, child labour",
+      "Slums and deprivation in urban areas"
+    ],
+    "Politics and Society (India)": [
+      "Nation, democracy and citizenship",
+      "Political parties, pressure groups",
+      "Social and political elite",
+      "Regionalism and decentralisation of power",
+      "Secularisation"
+    ],
+    "Social Movements in Modern India": [
+      "Peasants and farmers movements",
+      "Women's movement",
+      "Backward classes and Dalit movements",
+      "Environmental movements",
+      "Ethnicity and identity movements"
+    ],
+    "Population Dynamics": [
+      "Population size, growth, composition and distribution",
+      "Components of population growth",
+      "Population policy and family planning",
+      "Emerging issues — ageing, sex ratio, child and infant mortality, reproductive health"
+    ],
+    "Challenges of Social Transformation": [
+      "Crisis of development — displacement, environment, sustainability",
+      "Poverty, deprivation and inequalities",
+      "Violence against women",
+      "Caste conflicts",
+      "Ethnic conflicts, communalism, religious revivalism",
+      "Illiteracy and disparities in education"
+    ]
+  }
+};
+
+</script>
+<script>
+// Question bank built from YOUR OWN uploaded notes.
+// Every answer is your note text — nothing is AI-generated fact.
+// To add more: copy the pattern below. id must be unique.
+window.QUESTIONS = [
+
+/* ============ POLITY — QUOTES ============ */
+{id:"p001",subject:"Polity",topic:"Quotes",q:"Who said the Constitution is not a mere lawyer's document but a vehicle of life, its spirit always the spirit of the age?",a:"Dr. B.R. Ambedkar"},
+{id:"p002",subject:"Polity",topic:"Quotes",q:"Who said that however good a Constitution may be, it is sure to turn out bad because those called to work it happen to be a bad lot?",a:"Dr. B.R. Ambedkar"},
+{id:"p003",subject:"Polity",topic:"Quotes",q:"Complete: 'Political democracy lies on the foundation of ___' — and who said it?",a:"Social democracy. — Dr. B.R. Ambedkar"},
+{id:"p004",subject:"Polity",topic:"Quotes",q:"Who called the Preamble the 'Horoscope of our Sovereign Democratic Republic'?",a:"K.M. Munshi"},
+{id:"p005",subject:"Polity",topic:"Quotes",q:"Who called the Preamble the 'Jewel set in the Constitution'?",a:"Pandit Thakurdas Bhargava"},
+{id:"p006",subject:"Polity",topic:"Quotes",q:"Which case described the Preamble as 'a key to open the minds of the Constitution makers'?",a:"Supreme Court in the Berubari Union Case (1960)"},
+{id:"p007",subject:"Polity",topic:"Quotes",q:"Who called Fundamental Rights the 'Conscience of the Constitution'?",a:"Granville Austin"},
+{id:"p008",subject:"Polity",topic:"Quotes",q:"Who said Article 32 is the 'heart and soul of the Constitution'?",a:"Dr. B.R. Ambedkar"},
+{id:"p009",subject:"Polity",topic:"Quotes",q:"Who said FRs are the soul of the Constitution and the very foundation of our democracy?",a:"Justice P.N. Bhagwati"},
+{id:"p010",subject:"Polity",topic:"Quotes",q:"Who coined 'Transformative Constitutionalism'?",a:"Upendra Baxi"},
+{id:"p011",subject:"Polity",topic:"Quotes",q:"Complete Ambedkar: 'While FRs establish political democracy, DPSPs aim at ___'",a:"Economic and social democracy"},
+{id:"p012",subject:"Polity",topic:"Quotes",q:"Who called Private Member Bills 'forward-looking' and a 'gold-mine' for legislative progress?",a:"Jagdeep Dhankar (Vice-President of India)"},
+{id:"p013",subject:"Polity",topic:"Quotes",q:"Which quote describes the Speaker as the moral compass of Parliament?",a:"'The Speaker is the moral compass of Parliament, if it wavers, democratic discourse derails.'"},
+{id:"p014",subject:"Polity",topic:"Quotes",q:"Which quote frames the opposition's role beyond criticism?",a:"'In a healthy democracy, the opposition is not just a critic, but a watchdog and policy challenger.'"},
+{id:"p015",subject:"Polity",topic:"Quotes",q:"Which quote positions the opposition as a protector rather than adversary?",a:"'Opposition is not an adversary of the state but a protector of democracy, dissent and deliberation.'"},
+{id:"p016",subject:"Polity",topic:"Quotes",q:"What are Parliamentary Committees called in the 'engine rooms' quote?",a:"'Engine rooms of legislative scrutiny'"},
+{id:"p017",subject:"Polity",topic:"Quotes",q:"Who said there is no better test of the excellence of a government than the efficiency of its judicial system?",a:"Lord Bryce"},
+{id:"p018",subject:"Polity",topic:"Quotes",q:"Who said the Supreme Court has been doing chemotherapy on the carcinogenic politics in India?",a:"Upendra Baxi"},
+{id:"p019",subject:"Polity",topic:"Quotes",q:"Who said the judiciary in India will not be a silent spectator but an active participant in India's social revolution?",a:"Pt. Nehru"},
+{id:"p020",subject:"Polity",topic:"Quotes",q:"Complete: 'Indian Parliament — not just a building of brick and stone, but ___'",a:"'the beating heart of world's largest democracy.'"},
+
+/* ============ POLITY — ARTICLES ============ */
+{id:"p021",subject:"Polity",topic:"Articles",q:"Article 1 deals with?",a:"Union of States"},
+{id:"p022",subject:"Polity",topic:"Articles",q:"Article 51 deals with?",a:"Sovereign Equality (international peace and security)"},
+{id:"p023",subject:"Polity",topic:"Articles",q:"Article 326 deals with?",a:"Universal Adult Franchise (Political Justice)"},
+{id:"p024",subject:"Polity",topic:"Articles",q:"Articles 324-329 cover?",a:"Elections and the Election Commission"},
+{id:"p025",subject:"Polity",topic:"Articles",q:"Article 19(1)(a) guarantees?",a:"Freedom of Speech and Expression"},
+{id:"p026",subject:"Polity",topic:"Articles",q:"Articles 52-54 relate to?",a:"President (Nominal Head)"},
+{id:"p027",subject:"Polity",topic:"Articles",q:"Articles 74-75 relate to?",a:"PM and Council of Ministers — Aid & Advice, collective responsibility"},
+{id:"p028",subject:"Polity",topic:"Articles",q:"Articles 14-18 cover?",a:"Right to Equality"},
+{id:"p029",subject:"Polity",topic:"Articles",q:"Article 39(b-c) covers?",a:"Economic justice — equal access to resources; no concentration of wealth"},
+{id:"p030",subject:"Polity",topic:"Articles",q:"Article 41 provides for?",a:"Right to Work (and education)"},
+{id:"p031",subject:"Polity",topic:"Articles",q:"Name the six freedoms under Article 19(1)(a-g).",a:"Speech, assembly, association, movement, residence, profession"},
+{id:"p032",subject:"Polity",topic:"Articles",q:"Articles 19(2)-19(6) provide for?",a:"Reasonable restrictions on 19(1)(a-g)"},
+{id:"p033",subject:"Polity",topic:"Articles",q:"Article 21 guarantees?",a:"Right to Life and Personal Liberty"},
+{id:"p034",subject:"Polity",topic:"Articles",q:"Article 14 embodies which two doctrines?",a:"EBL (Equality Before Law) and EPL (Equal Protection of Laws)"},
+{id:"p035",subject:"Polity",topic:"Articles",q:"Article 15 prohibits discrimination on which grounds (mnemonic RRCSP)?",a:"Religion, Race, Caste, Sex, Place of birth"},
+{id:"p036",subject:"Polity",topic:"Articles",q:"Article 16 deals with?",a:"Public employment (Economic Justice)"},
+{id:"p037",subject:"Polity",topic:"Articles",q:"Articles 29-30 cover?",a:"Religious minority rights — culture and educational institutes"},
+{id:"p038",subject:"Polity",topic:"Articles",q:"Article 356 provides for?",a:"President's Rule + Parliament assumes legislative power of the concerned State Legislature"},
+{id:"p039",subject:"Polity",topic:"Articles",q:"Articles 36-51 cover?",a:"DPSP → welfare state"},
+{id:"p040",subject:"Polity",topic:"Articles",q:"Article 38 directs the state to?",a:"Reduce inequality; secure a social order"},
+{id:"p041",subject:"Polity",topic:"Articles",q:"Article 43 provides for?",a:"Living wage; cottage industries"},
+{id:"p042",subject:"Polity",topic:"Articles",q:"Article 39A provides for?",a:"Free legal aid"},
+{id:"p043",subject:"Polity",topic:"Articles",q:"Article 343 deals with?",a:"Hindi as official language"},
+{id:"p044",subject:"Polity",topic:"Articles",q:"Article 312 deals with?",a:"All India Services"},
+{id:"p045",subject:"Polity",topic:"Articles",q:"Article 249 empowers?",a:"Rajya Sabha (2/3rd majority) to pass a resolution letting Parliament legislate on a State List matter in national interest"},
+{id:"p046",subject:"Polity",topic:"Articles",q:"Article 32 provides for which five writs?",a:"Habeas Corpus, Mandamus, Prohibition, Certiorari, Quo Warranto"},
+{id:"p047",subject:"Polity",topic:"Articles",q:"Article 248 deals with?",a:"Residuary powers with the Centre"},
+{id:"p048",subject:"Polity",topic:"Articles",q:"Article 25-28 cover?",a:"Freedom of Religion"},
+{id:"p049",subject:"Polity",topic:"Articles",q:"Articles 1 & 3 relate to?",a:"Territorial Integrity"},
+{id:"p050",subject:"Polity",topic:"Articles",q:"Articles 330-342 cover?",a:"Political Reservations"},
+{id:"p051",subject:"Polity",topic:"Articles",q:"Article 15(4) provides?",a:"Special provisions to socially & educationally Backward Classes"},
+{id:"p052",subject:"Polity",topic:"Articles",q:"Article 16(4) provides?",a:"Reservation in employment to Backward class citizens"},
+{id:"p053",subject:"Polity",topic:"Articles",q:"Article 246 relates to?",a:"Schedule 7 — Union, State and Concurrent Lists"},
+{id:"p054",subject:"Polity",topic:"Articles",q:"Article 22 deals with?",a:"Preventive Detention"},
+{id:"p055",subject:"Polity",topic:"Articles",q:"Article 40 provides for?",a:"Organisation of Panchayats [73rd CAA]"},
+{id:"p056",subject:"Polity",topic:"Articles",q:"Article 44 relates to?",a:"UCC (Uniform Civil Code)"},
+{id:"p057",subject:"Polity",topic:"Articles",q:"Article 45 provides for?",a:"Early Childhood care [86th CAA]"},
+{id:"p058",subject:"Polity",topic:"Articles",q:"Article 48A deals with?",a:"Environment [42nd CAA]"},
+{id:"p059",subject:"Polity",topic:"Articles",q:"Article 50 provides for?",a:"Separation of power — Judiciary and Executive"},
+{id:"p060",subject:"Polity",topic:"Articles",q:"Article 250 provides that?",a:"During National Emergency, Parliament can legislate on State List subjects"},
+{id:"p061",subject:"Polity",topic:"Articles",q:"Article 252 provides for?",a:"Two or more states requesting Parliament to legislate"},
+{id:"p062",subject:"Polity",topic:"Articles",q:"Article 254 embodies which doctrine?",a:"Doctrine of Repugnancy"},
+{id:"p063",subject:"Polity",topic:"Articles",q:"Article 263 provides for?",a:"Inter-State Council"},
+{id:"p064",subject:"Polity",topic:"Articles",q:"Article 352 and Article 360 deal with?",a:"352 — National Emergency; 360 — Financial Emergency"},
+{id:"p065",subject:"Polity",topic:"Articles",q:"Article 280 deals with?",a:"Finance Commission"},
+{id:"p066",subject:"Polity",topic:"Articles",q:"Article 279A deals with?",a:"GST Council"},
+{id:"p067",subject:"Polity",topic:"Articles",q:"Article 123 vs Article 213 — what is the difference?",a:"123 — Ordinance promulgation by President; 213 — by Governor"},
+{id:"p068",subject:"Polity",topic:"Articles",q:"Article 61 deals with?",a:"Impeachment of President"},
+{id:"p069",subject:"Polity",topic:"Articles",q:"Article 85 empowers the President to?",a:"Summon, Prorogue and dissolve Parliament"},
+{id:"p070",subject:"Polity",topic:"Articles",q:"Article 111 deals with?",a:"President gives, withholds or returns assent to bills"},
+{id:"p071",subject:"Polity",topic:"Articles",q:"Article 110 defines?",a:"Money Bill"},
+{id:"p072",subject:"Polity",topic:"Articles",q:"Article 112 deals with?",a:"Annual Financial Statement"},
+{id:"p073",subject:"Polity",topic:"Articles",q:"Article 267 provides for?",a:"Contingency Fund"},
+{id:"p074",subject:"Polity",topic:"Articles",q:"Article 72 gives the President?",a:"Clemency Powers"},
+{id:"p075",subject:"Polity",topic:"Articles",q:"Article 143 provides for?",a:"Presidential Reference"},
+{id:"p076",subject:"Polity",topic:"Articles",q:"Article 53 makes the President?",a:"Supreme Commander of Defence Forces"},
+{id:"p077",subject:"Polity",topic:"Articles",q:"Article 163 deals with?",a:"Discretionary powers of the Governor"},
+{id:"p078",subject:"Polity",topic:"Articles",q:"Article 200 deals with?",a:"Governor — withhold, give or reserve assent to bills"},
+{id:"p079",subject:"Polity",topic:"Articles",q:"Article 161 gives the Governor?",a:"Pardoning power"},
+{id:"p080",subject:"Polity",topic:"Articles",q:"Article 78 requires the PM to?",a:"Communicate all decisions of the Cabinet to the President"},
+{id:"p081",subject:"Polity",topic:"Articles",q:"Articles 80 and 81 deal with?",a:"80 — Rajya Sabha; 81 — Lok Sabha"},
+{id:"p082",subject:"Polity",topic:"Articles",q:"Article 108 provides for?",a:"Joint Sitting of Parliament"},
+{id:"p083",subject:"Polity",topic:"Articles",q:"Article 265 states?",a:"No tax can be levied or collected without a law passed by Parliament"},
+{id:"p084",subject:"Polity",topic:"Articles",q:"Article 124(4) and Article 217 relate to?",a:"124(4) — Removal of SC judge; 217 — Removal of HC judge"},
+{id:"p085",subject:"Polity",topic:"Articles",q:"Article 148 and 148(1) relate to?",a:"148 — CAG; 148(1) — Impeachment of CAG"},
+{id:"p086",subject:"Polity",topic:"Articles",q:"Article 324(5) deals with?",a:"Impeachment of CEC and ECs"},
+{id:"p087",subject:"Polity",topic:"Articles",q:"Article 105 and Article 194 relate to?",a:"105 — Breach of privileges of Parliament; 194 — Privileges of State Legislatures"},
+{id:"p088",subject:"Polity",topic:"Articles",q:"Article 122 provides?",a:"Protects parliamentary procedures from direct judicial intervention — except on constitutional grounds"},
+{id:"p089",subject:"Polity",topic:"Articles",q:"Article 93 deals with?",a:"Election of Speaker and Deputy Speaker of Lok Sabha"},
+{id:"p090",subject:"Polity",topic:"Articles",q:"Article 100 deals with?",a:"Quorum of Lok Sabha and Rajya Sabha"},
+{id:"p091",subject:"Polity",topic:"Articles",q:"Article 169 deals with?",a:"Creation or Abolition of State Legislative Councils"},
+{id:"p092",subject:"Polity",topic:"Articles",q:"Article 323A-B deals with?",a:"Establishment and jurisdiction of tribunals"},
+{id:"p093",subject:"Polity",topic:"Articles",q:"Article 243 A, G, I, K relate to?",a:"A — Gram Sabha; G — Devolution of powers & responsibilities (Panchayats); I — State Finance Commissions; K — State Election Commissions"},
+{id:"p094",subject:"Polity",topic:"Articles",q:"Article 243 Q, S, W, Y, ZA relate to?",a:"Q — Types of Municipal Bodies; S — Ward Committees; W — Devolution of power (Municipalities); Y — State Finance Commissions; ZA — State Election Commissions"},
+{id:"p095",subject:"Polity",topic:"Articles",q:"Article 244 deals with?",a:"PRI provisions to Scheduled Areas; 244(1) — Scheduled Areas; 244(2) — Tribal Areas in North-East"},
+{id:"p096",subject:"Polity",topic:"Articles",q:"Articles 338, 338A, 338B relate to?",a:"Empower NCSC, NCST, NCBC with inquiry powers"},
+{id:"p097",subject:"Polity",topic:"Articles",q:"Articles 315-323 relate to?",a:"UPSC"},
+{id:"p098",subject:"Polity",topic:"Articles",q:"Article 317 provides?",a:"Removal by President only — UPSC"},
+
+/* ============ POLITY — AMENDMENTS ============ */
+{id:"p099",subject:"Polity",topic:"Amendments",q:"73rd and 74th CAA relate to?",a:"Panchayati Raj (and urban local bodies)"},
+{id:"p100",subject:"Polity",topic:"Amendments",q:"86th CAA did what two things?",a:"Right to Education; 11th duty in Art 51A — obligation of parents to provide education to children aged 6-14 yrs"},
+{id:"p101",subject:"Polity",topic:"Amendments",q:"101st CAA relates to?",a:"GST"},
+{id:"p102",subject:"Polity",topic:"Amendments",q:"103rd CAA relates to?",a:"EWS Reservation"},
+{id:"p103",subject:"Polity",topic:"Amendments",q:"106th CAA relates to?",a:"Nari Shakti Vandan Adhiniyam"},
+{id:"p104",subject:"Polity",topic:"Amendments",q:"What did the 44th CAA change regarding Emergency?",a:"Replaced 'internal disturbances' with 'armed rebellion'; Articles 20 & 21 cannot be suspended during Emergency"},
+{id:"p105",subject:"Polity",topic:"Amendments",q:"99th CAA related to?",a:"National Judicial Appointments Commission (NJAC)"},
+{id:"p106",subject:"Polity",topic:"Amendments",q:"26th CAA did what?",a:"Abolition of privy purse"},
+{id:"p107",subject:"Polity",topic:"Amendments",q:"61st CAA did what?",a:"Lowered voting age to 18 yrs"},
+{id:"p108",subject:"Polity",topic:"Amendments",q:"39th CAA did what?",a:"Placed election of the PM beyond judicial scrutiny"},
+{id:"p109",subject:"Polity",topic:"Amendments",q:"104th CAA did what two things?",a:"Abolished reserved seats for Anglo-Indians; extended SC/ST reservation by 10 yrs"},
+{id:"p110",subject:"Polity",topic:"Amendments",q:"91st CAA relates to?",a:"Strength of Cabinet"},
+{id:"p111",subject:"Polity",topic:"Amendments",q:"100th CAA relates to?",a:"Exchange of enclave territories with Bangladesh"},
+{id:"p112",subject:"Polity",topic:"Amendments",q:"102nd CAA relates to?",a:"NCBC"},
+{id:"p113",subject:"Polity",topic:"Amendments",q:"42nd CAA did what two things?",a:"Added Fundamental Duties; added 'Socialist' and 'Secular' to the Preamble"},
+{id:"p114",subject:"Polity",topic:"Amendments",q:"52nd CAA relates to?",a:"10th Schedule (Anti-Defection)"},
+{id:"p115",subject:"Polity",topic:"Amendments",q:"24th CAA did what?",a:"Affirmed Parliament's power to amend FRs"},
+{id:"p116",subject:"Polity",topic:"Amendments",q:"7th CAA did what?",a:"Reorganization of states on linguistic basis"},
+
+/* ============ POLITY — JUDGMENTS ============ */
+{id:"p117",subject:"Polity",topic:"Judgments",q:"Berubari Union Case (1960) held what?",a:"Preamble is not a part of the Constitution; Constitutional sovereignty over Parliamentary supremacy"},
+{id:"p118",subject:"Polity",topic:"Judgments",q:"PUCL v. UoI (2003) held?",a:"Background of candidates — right to know; NOTA introduced"},
+{id:"p119",subject:"Polity",topic:"Judgments",q:"Indra Sawhney v. UoI (1992) held?",a:"OBC reservation — 27%; substantive social justice"},
+{id:"p120",subject:"Polity",topic:"Judgments",q:"Maneka Gandhi v. UoI (1978) established?",a:"Due process of law"},
+{id:"p121",subject:"Polity",topic:"Judgments",q:"K.S. Puttaswamy (2017) established what, and what is the threefold test?",a:"Right to Privacy. Threefold test: Legality, Necessity, Proportionality"},
+{id:"p122",subject:"Polity",topic:"Judgments",q:"Navtej Singh Johar v. UoI (2018) held?",a:"Decriminalising homosexuality"},
+{id:"p123",subject:"Polity",topic:"Judgments",q:"Sabarimala Case (2018) held?",a:"Entry of women in temple"},
+{id:"p124",subject:"Polity",topic:"Judgments",q:"S.R. Bommai v. UoI (1994) held what three things?",a:"Secularism part of Basic Structure; limit misuse of Art 356; federalism a basic feature. Majority to be tested on floor of Assembly"},
+{id:"p125",subject:"Polity",topic:"Judgments",q:"Kesavananda Bharati v. UoI (1973) held?",a:"Basic Structure Doctrine; Preamble is part of the Constitution"},
+{id:"p126",subject:"Polity",topic:"Judgments",q:"Golaknath v. State of Punjab (1967) held?",a:"Fundamental Rights are 'sacrosanct' and cannot be amended; FRs > DPSPs. (Doctrine of Judicial Review)"},
+{id:"p127",subject:"Polity",topic:"Judgments",q:"Raj Narain Case (1975) held?",a:"Indira Gandhi's 1971 election nullified (malpractices during election); struck down part of 39th CAA. Doctrine of separation of powers"},
+{id:"p128",subject:"Polity",topic:"Judgments",q:"ADM Jabalpur Case (1976) held?",a:"Fundamental Rights (including Art 20 & 21) can remain suspended during Emergency"},
+{id:"p129",subject:"Polity",topic:"Judgments",q:"Vishakha Guidelines (1997) dealt with?",a:"Protection against sexual harassment at workplaces"},
+{id:"p130",subject:"Polity",topic:"Judgments",q:"Minerva Mills v. UoI (1980) held what three things?",a:"Judicial review part of Basic Structure; harmony between FR & DPSP; Preamble integral to Constitution"},
+{id:"p131",subject:"Polity",topic:"Judgments",q:"SC Advocates-on-Record Association v. UoI (2015) did what?",a:"Struck down NJAC"},
+{id:"p132",subject:"Polity",topic:"Judgments",q:"Shreya Singhal v. UoI (2015) did what?",a:"Struck down Sec 66A of IT Act"},
+{id:"p133",subject:"Polity",topic:"Judgments",q:"Bijoe Emmanuel v. State of Kerala (1986) held?",a:"Protected freedom of conscience (anthem case); duty to respect national symbols"},
+{id:"p134",subject:"Polity",topic:"Judgments",q:"State of Kerala v. N.M. Thomas (1976) held?",a:"Affirmative action essential to substantive equality"},
+{id:"p135",subject:"Polity",topic:"Judgments",q:"M.C. Mehta Case (1988) established?",a:"Right to Environment; duty to protect the environment [Art 51A(g)]"},
+{id:"p136",subject:"Polity",topic:"Judgments",q:"Olga Tellis Case (1985) established?",a:"Right to Shelter and Livelihood"},
+{id:"p137",subject:"Polity",topic:"Judgments",q:"NALSA v. UoI (2014) held?",a:"Recognized transgenders as third gender"},
+{id:"p138",subject:"Polity",topic:"Judgments",q:"LIC India Case (1995) said about the Preamble?",a:"Preamble is a guiding light for interpreting DPSPs and FRs"},
+{id:"p139",subject:"Polity",topic:"Judgments",q:"Davinder Singh Case (2024) held?",a:"Sub-categorisation of SCs"},
+{id:"p140",subject:"Polity",topic:"Judgments",q:"Anuradha Bhasin v. UoI (2020) held?",a:"Internet access is part of free speech"},
+{id:"p141",subject:"Polity",topic:"Judgments",q:"Romesh Thapar v. State of Madras (1950) held?",a:"Free speech is the foundation of democracy"},
+{id:"p142",subject:"Polity",topic:"Judgments",q:"A.K. Gopalan v. State of Madras (1950) established?",a:"Procedure established by law"},
+{id:"p143",subject:"Polity",topic:"Judgments",q:"Sunil Batra v. Delhi Administration (1978) held?",a:"Prisoner's rights; solitary confinement against dignity of individual"},
+{id:"p144",subject:"Polity",topic:"Judgments",q:"Champakam Dorairajan v. State of Madras (1951) held?",a:"DPSPs cannot override FRs"},
+{id:"p145",subject:"Polity",topic:"Judgments",q:"Unni Krishnan v. State of Andhra Pradesh (1993) held?",a:"Right to Education (DPSP) part of Art 21"},
+{id:"p146",subject:"Polity",topic:"Judgments",q:"I.R. Coelho v. State of Tamil Nadu (2007) held?",a:"Laws placed under 9th Schedule post-Kesavananda are open to judicial review"},
+{id:"p147",subject:"Polity",topic:"Judgments",q:"Shankari Prasad (1951) vs Sajjan Singh (1965) — what did they hold?",a:"Shankari Prasad: Parliament has unrestricted power to amend any part of Constitution. Sajjan Singh: Parliament's power to amend any part including FRs"},
+{id:"p148",subject:"Polity",topic:"Judgments",q:"Waman Rao v. UoI (1981) held?",a:"Amendments after Kesavananda must respect Basic Structure"},
+{id:"p149",subject:"Polity",topic:"Judgments",q:"B.P. Singhal v. UoI (2010) held?",a:"President can remove Governors without reasons, but such removal cannot be arbitrary"},
+{id:"p150",subject:"Polity",topic:"Judgments",q:"Shatrughan Chauhan v. UoI (2014) held?",a:"Pending mercy petitions — a mental torture"},
+{id:"p151",subject:"Polity",topic:"Judgments",q:"Kehar Singh (1989) and Epuru Sudhakar (2006) held what about mercy powers?",a:"Mercy powers subject to judicial review in cases of malafide/procedural bias, arbitrariness or without application of mind; President exercises powers on advice of CoM"},
+{id:"p152",subject:"Polity",topic:"Judgments",q:"Nabam Rebia v. Deputy Speaker (2016) held?",a:"Struck down the Governor's decision to advance the Assembly session without Cabinet advice [Arunachal Pradesh]"},
+{id:"p153",subject:"Polity",topic:"Judgments",q:"Shamsher Singh v. State of Punjab (1974) held?",a:"President is a constitutional head; must act on aid & advice of CoM"},
+{id:"p154",subject:"Polity",topic:"Judgments",q:"R.K. Jain v. UoI (1993) held?",a:"A non-MP can be appointed as a minister but must get elected within 6 months"},
+{id:"p155",subject:"Polity",topic:"Judgments",q:"B.R. Kapur v. State of Tamil Nadu (2001) held?",a:"A person disqualified under law cannot be appointed CM"},
+{id:"p156",subject:"Polity",topic:"Judgments",q:"D.C. Wadhwa v. State of Bihar (1987) held?",a:"Ordinance making is an emergency tool, not a replacement for regular lawmaking"},
+{id:"p157",subject:"Polity",topic:"Judgments",q:"Kihoto Hollohan v. Zachillhu (1992) held?",a:"Upheld anti-defection law; made Speaker's disqualification decisions subject to judicial review"},
+{id:"p158",subject:"Polity",topic:"Judgments",q:"Keshav Singh Case (1965) held?",a:"Legislative privileges are subject to constitutional limits and judicial review"},
+{id:"p159",subject:"Polity",topic:"Judgments",q:"PV Narsimha Rao (1998) vs Sita Soren (2024) — what changed?",a:"1998: MPs enjoy immunity for votes in Parliament, not for accepting bribes outside. 2024: MPs cannot claim immunity from bribery prosecution"},
+{id:"p160",subject:"Polity",topic:"Judgments",q:"Keisham Meghachandra Singh v. Speaker (2020) held?",a:"Disqualification petitions must be decided within 3 months"},
+{id:"p161",subject:"Polity",topic:"Judgments",q:"State of Bombay v. F.N. Balsara (1951) established which doctrine?",a:"Doctrine of Pith & Substance"},
+{id:"p162",subject:"Polity",topic:"Judgments",q:"Bhikaji Narain Dhakras v. State of M.P. (1955) established which doctrine?",a:"Doctrine of Eclipse"},
+{id:"p163",subject:"Polity",topic:"Judgments",q:"What did the First, Second and Third Judges Cases hold?",a:"First (1981): consultation with CJI does not mean concurrence; primacy to Executive. Second (1993): CJI's recommendation (based on collegium of senior judges) would have primacy. Third (1998): formally institutionalised collegium"},
+{id:"p164",subject:"Polity",topic:"Judgments",q:"Collegium composition for SC and HC?",a:"SC: CJI + 4 senior-most judges of SC. HC: CJ(HC) + 2 senior-most judges of HC + inputs from SC collegium"},
+{id:"p165",subject:"Polity",topic:"Judgments",q:"CIC v. Supreme Court of India (2010) held?",a:"CJI comes under RTI Act, requiring disclosure of judges' assets"},
+{id:"p166",subject:"Polity",topic:"Judgments",q:"Vineet Narain Case (1997) held?",a:"Establishment of CBI's autonomy; judicial monitoring of corruption investigations"},
+{id:"p167",subject:"Polity",topic:"Judgments",q:"L. Chandra Kumar v. UoI (1997) held?",a:"Tribunals are subject to judicial review"},
+{id:"p168",subject:"Polity",topic:"Judgments",q:"Delhi Services Case (2023) held?",a:"Elected governments must control civil servants, limiting Centre's power under Art 239AA"},
+{id:"p169",subject:"Polity",topic:"Judgments",q:"Centre v. Governor (Tamil Nadu, 2024) held?",a:"Governor cannot withhold bills indefinitely"},
+{id:"p170",subject:"Polity",topic:"Judgments",q:"Ram Jawaya Kapur v. State of Punjab (1955) held?",a:"India does not follow a strict separation, but a functional separation"},
+{id:"p171",subject:"Polity",topic:"Judgments",q:"Anoop Baranwal v. UoI (2023) held?",a:"Selection Committee of CEC & ECs — PM, LoP, CJI — until Parliament enacted a formal law"},
+{id:"p172",subject:"Polity",topic:"Judgments",q:"Lily Thomas v. UoI (2013) held?",a:"MPs/MLAs disqualified immediately on conviction"},
+{id:"p173",subject:"Polity",topic:"Judgments",q:"ADR Case (2002) held?",a:"Mandated declaration of criminal records, assets and education by candidates"},
+{id:"p174",subject:"Polity",topic:"Judgments",q:"Hussainara Khatoon v. State of Bihar (1979) held?",a:"Right to speedy trial as part of Art 21"},
+{id:"p175",subject:"Polity",topic:"Judgments",q:"Shayara Bano v. UoI (2017) held?",a:"Triple talaq — unconstitutional"},
+{id:"p176",subject:"Polity",topic:"Judgments",q:"M. Nagraj (2006) laid down which conditions for reservations in promotions?",a:"Quantifiable data, backwardness, efficiency"},
+{id:"p177",subject:"Polity",topic:"Judgments",q:"Jarnail Singh v. Lachhmi Narain Gupta (2018) changed what?",a:"Removed 'backwardness' from conditions for SC/ST promotions"},
+{id:"p178",subject:"Polity",topic:"Judgments",q:"Janhit Abhiyan v. UoI (2022) held?",a:"Allowed breach of 50% reservation cap"},
+{id:"p179",subject:"Polity",topic:"Judgments",q:"Aadhaar Verdict (2018) / Puttuswamy-II held?",a:"Upheld Aadhaar for welfare; need for proportional and minimal data use"},
+{id:"p180",subject:"Polity",topic:"Judgments",q:"Prakash Singh Case (2006) dealt with?",a:"Orders on Police Reforms"},
+{id:"p181",subject:"Polity",topic:"Judgments",q:"Subramanian Swamy v. UoI (2014) held?",a:"PIL not to become 'publicity interest litigations'"},
+
+/* ============ POLITY — COMMITTEES & COMMISSIONS ============ */
+{id:"p182",subject:"Polity",topic:"Committees",q:"Balwant Rai Mehta Committee (1957) recommended?",a:"Establish 3-tier Panchayati Raj — Gram Panchayat (Village), Panchayat Samiti (Block), Zila Parishad (District); direct elections and decentralised planning"},
+{id:"p183",subject:"Polity",topic:"Committees",q:"L.M. Singhvi Committee (1986) recommended?",a:"Give constitutional status to PRIs; Gram Sabha as foundation of local democracy"},
+{id:"p184",subject:"Polity",topic:"Committees",q:"G.V.K. Rao Committee (1985) recommended?",a:"District planning and implementation; strengthen Zila Parishads"},
+{id:"p185",subject:"Polity",topic:"Committees",q:"Vohra Committee (1993) highlighted?",a:"Criminal-politician nexus; legal and administrative reforms"},
+{id:"p186",subject:"Polity",topic:"Committees",q:"Swaran Singh Committee (1976) recommended?",a:"Fundamental Duties"},
+{id:"p187",subject:"Polity",topic:"Committees",q:"Indrajit Gupta Committee (1998) recommended?",a:"State funding of elections in kind"},
+{id:"p188",subject:"Polity",topic:"Committees",q:"Fazl Ali and JVP Committees dealt with?",a:"State Reorganisation"},
+{id:"p189",subject:"Polity",topic:"Committees",q:"Xaxa Committee recommendations on PESA include?",a:"Protect Gram Sabha autonomy; recognise hamlet-level sabhas; integrate with other laws (FRA, MGNREGA); mining contracts to tribal cooperatives; raise awareness and build capacity; create monitoring mechanisms"},
+{id:"p190",subject:"Polity",topic:"Committees",q:"Xaxa Committee (2014) on Tribal Welfare recommended?",a:"Recognize customary tribal laws; review land acquisition laws; strengthen Tribal Area Councils (TACs); prevent forced displacement"},
+{id:"p191",subject:"Polity",topic:"Committees",q:"Dinesh Goswami Committee (1990) recommended on campaigns?",a:"Strict enforcement of Model Code of Conduct; curb on paid news; monitoring of hate speech & fake news"},
+{id:"p192",subject:"Polity",topic:"Committees",q:"Sarkaria Commission (1988) key recommendations?",a:"Cooperative federalism; Inter-State Council with regular meetings and statutory backing; political neutrality of Governor; Governor appointee from outside the state and acceptable to CM; Governor must return bills within 4-6 weeks; greater state consultation in AIS appointments; Cabinet should meet regularly"},
+{id:"p193",subject:"Polity",topic:"Committees",q:"Punchhi Commission key recommendations?",a:"Inter-State Council statutory backing; fixed tenure of Governor; post-retirement cooling off period for Governor; Inter-State Trade & Commerce Commission; better documentation of Cabinet decisions; functional expansion of V-P's role"},
+{id:"p194",subject:"Polity",topic:"Committees",q:"Punchhi Commission's selection panel for Governor?",a:"PM, Home Minister, CM of state, Speaker"},
+{id:"p195",subject:"Polity",topic:"Committees",q:"Rohini Commission — finding and recommendation?",a:"Finding: 97% of OBC benefits went to just 25% of OBC communities. Recommendation: Sub-categorization of OBCs"},
+{id:"p196",subject:"Polity",topic:"Committees",q:"14th Finance Commission (2015-20) recommended what devolution?",a:"42% devolution of divisible taxes to states"},
+{id:"p197",subject:"Polity",topic:"Committees",q:"15th Finance Commission recommended?",a:"41% devolution to states + 1% to J&K; performance-linked grants to ULBs; adopt clear activity mapping b/w state & municipal institutions to avoid overlapping"},
+{id:"p198",subject:"Polity",topic:"Committees",q:"Bhuria Committee (1995) recommended?",a:"Extend PRI provisions to Scheduled Areas; decentralised decision-making"},
+{id:"p199",subject:"Polity",topic:"Committees",q:"Dhebar Committee (1961) found?",a:"Development schemes failed due to lack of tribal participation"},
+{id:"p200",subject:"Polity",topic:"Committees",q:"Justice Malimath and Justice Krishna Iyer Committees recommended?",a:"Malimath — Gram Nyayalayas; Krishna Iyer — Family Courts"},
+
+/* ============ POLITY — NCRWC / LAW COMMISSION / 2nd ARC ============ */
+{id:"p201",subject:"Polity",topic:"NCRWC",q:"NCRWC recommendation on Anti-Defection Law?",a:"Disqualification decision by an independent tribunal"},
+{id:"p202",subject:"Polity",topic:"NCRWC",q:"NCRWC recommendations on Judicial Reforms?",a:"Establish National Judicial Commission to appoint judges; transparency in appointment of judges"},
+{id:"p203",subject:"Polity",topic:"NCRWC",q:"NCRWC recommendations on Centre-State relations?",a:"Greater autonomy to states; reform Art 356 to prevent misuse; cooperative federalism; better fiscal devolution to states"},
+{id:"p204",subject:"Polity",topic:"NCRWC",q:"NCRWC recommendations on Electoral Reforms?",a:"State funding of elections in kind; transparency in campaign finance; auditing of political parties"},
+{id:"p205",subject:"Polity",topic:"NCRWC",q:"NCRWC recommendation on Preventive Detention?",a:"Capping at 6 months; advisory board of serving HC judges"},
+{id:"p206",subject:"Polity",topic:"NCRWC",q:"NCRWC on how often Parliament should meet?",a:"At least 100 days per year"},
+{id:"p207",subject:"Polity",topic:"Law Commission",q:"170th Report recommended?",a:"Transfer disqualification powers — Speaker to independent tribunal or ECI (ADR reforms)"},
+{id:"p208",subject:"Polity",topic:"Law Commission",q:"214th Report recommended?",a:"Establish a permanent secretariat to manage logistics, maintain records and provide research inputs to the Collegium"},
+{id:"p209",subject:"Polity",topic:"Law Commission",q:"Law Commission's recommended judge-to-population ratio?",a:"50 per million"},
+{id:"p210",subject:"Polity",topic:"Law Commission",q:"272nd Report (2017) recommended?",a:"Uniformity in structure and tenure of members in Tribunals"},
+{id:"p211",subject:"Polity",topic:"Law Commission",q:"255th Report recommended?",a:"Legal backing for de-registration of parties"},
+{id:"p212",subject:"Polity",topic:"Law Commission",q:"Law Commission recommendation on candidates facing serious charges?",a:"Disqualification of candidates facing charges for serious offences, even before conviction, if framed by a court"},
+{id:"p213",subject:"Polity",topic:"2nd ARC",q:"2nd ARC on the role of Governors?",a:"Governors to act as 'constitutional sentinels', not political actors"},
+{id:"p214",subject:"Polity",topic:"2nd ARC",q:"2nd ARC on committee reports?",a:"Committee reports should be given more weight in law-making + Ministries must mandatorily respond within a fixed timeline"},
+{id:"p215",subject:"Polity",topic:"2nd ARC",q:"2nd ARC on the 10th Schedule?",a:"Decisions under the 10th Schedule should be made by an external judicial body, not the Speaker"},
+{id:"p216",subject:"Polity",topic:"2nd ARC",q:"2nd ARC recommendations on UPSC?",a:"Separate boards for technical & non-technical recruitment; overhaul of recruitment and training policies; reduction in political appointments"},
+{id:"p217",subject:"Polity",topic:"2nd ARC",q:"2nd ARC on election funding?",a:"Create a National Election Fund → transparent & publicly disclosed donations; collegium-based appointments in Election Commission"},
+
+/* ============ POLITY — DATA & FACTS ============ */
+{id:"p218",subject:"Polity",topic:"Data",q:"Constitution: initially vs currently?",a:"Initially 395 Articles + 8 Schedules → Currently 470+ Articles, 12 Schedules, 100+ Amendments"},
+{id:"p219",subject:"Polity",topic:"Data",q:"2019 Lok Sabha Elections voter turnout?",a:"67%"},
+{id:"p220",subject:"Polity",topic:"Data",q:"ADR (2024) Report on criminal cases among LS MPs?",a:"40% of LS MPs have criminal cases on them"},
+{id:"p221",subject:"Polity",topic:"Data",q:"DoPT data on reserved posts?",a:"40-50% reserved posts remain vacant"},
+{id:"p222",subject:"Polity",topic:"Data",q:"17th Lok Sabha productivity?",a:"47%; Monsoon Session 2023 — LS 18%, RS 28%"},
+{id:"p223",subject:"Polity",topic:"Data",q:"Debate deficit data?",a:"42% bills passed under 30 min discussion; 2020 Farm Bills cleared in just 7 min"},
+{id:"p224",subject:"Polity",topic:"Data",q:"Reduced working days of Parliament?",a:"70 days/year vs 120-140 days (1950s); UK 150+; US 260+"},
+{id:"p225",subject:"Polity",topic:"Data",q:"Weak budget oversight (2023)?",a:"75% Demand for Grants passed without debate; only 11% got detailed scrutiny"},
+{id:"p226",subject:"Polity",topic:"Data",q:"How many MPs were suspended in 2023?",a:"146"},
+{id:"p227",subject:"Polity",topic:"Data",q:"Declining legislative output — 17th LS vs 16th LS?",a:"17th LS: 179 bills passed vs 16th LS: 205 bills passed"},
+{id:"p228",subject:"Polity",topic:"Data",q:"Private Member's Bills passed — 16th LS vs 15th LS?",a:"2 bills vs 14 bills"},
+{id:"p229",subject:"Polity",topic:"Data",q:"Percentage of Bills referred to DRSCs across LS terms?",a:"15th LS: 71% → 16th LS: 27% → 17th LS: 13-15%"},
+{id:"p230",subject:"Polity",topic:"Data",q:"Women judges — State of Judiciary Report (2023)?",a:"HCs: 14% of judges; SC: under 10% of judges"},
+{id:"p231",subject:"Polity",topic:"Data",q:"Prison Statistics India report (2023) on undertrials?",a:"Undertrial prisoners constitute ~75% of India's prison population"},
+{id:"p232",subject:"Polity",topic:"Data",q:"National Judicial Data Grid (2024) pendency?",a:"5 crore+ cases pending across courts"},
+{id:"p233",subject:"Polity",topic:"Data",q:"Vacancy in High Courts (mid-2024)?",a:"Nearly 35% of sanctioned posts vacant"},
+{id:"p234",subject:"Polity",topic:"Data",q:"E-Courts Project — launched when and under what?",a:"Launched in 2005 under National e-Governance Plan; to digitise court records and improve case management"},
+{id:"p235",subject:"Polity",topic:"Data",q:"Vacancies in lower judiciary (2025)?",a:"5,000 vacancies exist"},
+{id:"p236",subject:"Polity",topic:"Data",q:"Gram Nyayalayas functional across India (2025)?",a:"Fewer than 500"},
+{id:"p237",subject:"Polity",topic:"Data",q:"August 2023 Lok Adalat record?",a:"1 crore cases settled in a single day across India [Record Disposal during National Lok Adalats]"},
+{id:"p238",subject:"Polity",topic:"Data",q:"NALSA's Digital Lok Adalats (2023) resolved?",a:"27 lakh cases using AI-assisted platforms"},
+{id:"p239",subject:"Polity",topic:"Data",q:"RBI (2023) on own-source revenue of rural local bodies?",a:"Under 5% of their total income in most states"},
+{id:"p240",subject:"Polity",topic:"Data",q:"MoHUA (2023) on municipalities and vacancies?",a:"4,500 municipalities operate in India; over 30% of engineering & sanitation posts in ULBs are vacant"},
+{id:"p241",subject:"Polity",topic:"Data",q:"MoHUA (2021) on urban planners?",a:"60% of cities lack qualified urban planners on their staff"},
+{id:"p242",subject:"Polity",topic:"Data",q:"Municipal bonds data?",a:"Out of 4,000+ ULBs in India, only 10 have raised funds through municipal bonds (as of 2023)"},
+{id:"p243",subject:"Polity",topic:"Data",q:"CIC Annual Report 2023-24 on RTI?",a:"2.8 lakh+ RTI requests filed with central authorities"},
+{id:"p244",subject:"Polity",topic:"Data",q:"NCRB on Preventive Detention conviction rate?",a:"Under one-third"},
+{id:"p245",subject:"Polity",topic:"Data",q:"Percentage of urban residents living in slums?",a:"~25%"},
+{id:"p246",subject:"Polity",topic:"Reforms",q:"List the standard 'Reforms Needed in XYZ body' template points.",a:"Status enhance (Executive → Statutory → Constitutional); findings/recommendations binding; independent funds; autonomy; independent secretariat; penal/judicial powers; infrastructure; expert help; time; transparent & timely appointments; broaden scope; security of tenure; head as constitutional post or selected by committee; judicial/quasi-judicial powers; power to summon; suo-motu action; independent budget; skilling & capacity building of staff; report tabling; recommendations published & binding; chairperson & members — selection committee, non-interference, salary/pension/allowance not dependent on any govt, reappointment, diverse & inclusive"},
+
+/* ============ SOCIOLOGY — DISCIPLINE ============ */
+{id:"s001",subject:"Sociology I",topic:"The Discipline",q:"What was the 'triple revolution' that sociology emerged in response to?",a:"French Revolution (political upheaval), Industrial Revolution (economic transformation), Enlightenment (intellectual rationalism)"},
+{id:"s002",subject:"Sociology I",topic:"The Discipline",q:"Who coined 'sociology' and in what year, seeking what?",a:"Comte, 1838 — seeking a 'social physics' to restore post-revolutionary order"},
+{id:"s003",subject:"Sociology I",topic:"The Discipline",q:"What was Europe's first sociology chair?",a:"Durkheim's appointment at Bordeaux (1895)"},
+{id:"s004",subject:"Sociology I",topic:"The Discipline",q:"Which school gave sociology its American reformist orientation, and who were its key figures?",a:"Chicago School (1920s-40s) — Robert Park, Ernest Burgess (empirical, policy-oriented); Jane Addams, W.E.B. Du Bois (sociology as tool for social justice)"},
+{id:"s005",subject:"Sociology I",topic:"The Discipline",q:"Which work is cited as pioneering empirical urban sociology with reformist intent?",a:"Du Bois's The Philadelphia Negro (1899)"},
+{id:"s006",subject:"Sociology I",topic:"The Discipline",q:"Which non-Western work predates Comte and what is its key concept?",a:"Ibn Khaldun's Muqaddimah (14th c.) on social cohesion — asabiyyah"},
+{id:"s007",subject:"Sociology I",topic:"The Discipline",q:"Which Ambedkar text is cited as a profoundly sociological work outside the Euro-American tradition?",a:"Annihilation of Caste (1936)"},
+{id:"s008",subject:"Sociology I",topic:"The Discipline",q:"Who called sociology the 'self-consciousness of modernity'?",a:"Giddens"},
+{id:"s009",subject:"Sociology I",topic:"The Discipline",q:"What did Durkheim's Rules of Sociological Method (1895) instruct?",a:"'Treat social facts as things' — study them with the same objectivity as natural phenomena"},
+{id:"s010",subject:"Sociology I",topic:"The Discipline",q:"Which Durkheim work is the paradigmatic demonstration of scientific temper, and how?",a:"Suicide (1897) — used statistical data to reveal social (not individual) patterns"},
+{id:"s011",subject:"Sociology I",topic:"The Discipline",q:"Whose falsifiability criterion refined the scientific-temper standard?",a:"Karl Popper"},
+{id:"s012",subject:"Sociology I",topic:"The Discipline",q:"What is Weber's Verstehen and why does it qualify positivism?",a:"Interpretive understanding — showed sociology cannot simply replicate natural-science method; must account for subjective meaning"},
+{id:"s013",subject:"Sociology I",topic:"The Discipline",q:"Who critiqued positivism from the Frankfurt School and phenomenology?",a:"Habermas (Frankfurt School) and Schutz (phenomenologists) — as inadequately capturing human agency"},
+{id:"s014",subject:"Sociology I",topic:"The Discipline",q:"Kant's Enlightenment motto?",a:"'Dare to know' (Sapere Aude)"},
+{id:"s015",subject:"Sociology I",topic:"The Discipline",q:"Who theorised society as a human construct via social contract?",a:"Hobbes, Locke, Rousseau"},
+{id:"s016",subject:"Sociology I",topic:"The Discipline",q:"Which postcolonial work argues European categories are historically specific, not universal templates?",a:"Dipesh Chakrabarty's Provincializing Europe"},
+{id:"s017",subject:"Sociology I",topic:"The Discipline",q:"Who applied statistics to human behaviour as 'social physics'?",a:"Quetelet"},
+{id:"s018",subject:"Sociology I",topic:"The Discipline",q:"Which pre-sociological empirical account fed Marx's analysis?",a:"Engels's The Condition of the Working Class in England (1845)"},
+{id:"s019",subject:"Sociology I",topic:"The Discipline",q:"What is Eisenstadt's thesis contesting Europe as the only site of modernity?",a:"Multiple modernities — modernity took diverse forms across civilisations, not a single European template replicated elsewhere"},
+{id:"s020",subject:"Sociology I",topic:"The Discipline",q:"What is Giddens's double hermeneutic?",a:"Sociology interprets a world that is itself already interpreted by its inhabitants"},
+{id:"s021",subject:"Sociology I",topic:"The Discipline",q:"Which Srinivas study is cited as paradigmatic sociology in a non-modern setting?",a:"Rampura village study (1952)"},
+{id:"s022",subject:"Sociology I",topic:"The Discipline",q:"Peter Berger's 'first wisdom of sociology'?",a:"'Things are not what they seem' — sociology's function is to denaturalise taken-for-granted assumptions"},
+{id:"s023",subject:"Sociology I",topic:"The Discipline",q:"Bauman on sociology and the familiar?",a:"Sociology 'defamiliarises the familiar'"},
+{id:"s024",subject:"Sociology I",topic:"The Discipline",q:"Bourdieu's term for common sense shaped by power?",a:"Doxa"},
+{id:"s025",subject:"Sociology I",topic:"The Discipline",q:"Whose phenomenological sociology treats the lifeworld as research's necessary starting point?",a:"Schutz"},
+{id:"s026",subject:"Sociology I",topic:"The Discipline",q:"What is Durkheim's 'epistemological break'?",a:"Deliberately setting aside common-sense 'prenotions' before scientific analysis can begin"},
+{id:"s027",subject:"Sociology I",topic:"The Discipline",q:"Who developed grounded theory?",a:"Glaser & Strauss"},
+{id:"s028",subject:"Sociology I",topic:"The Discipline",q:"Which contradiction illustrates common sense's internal inconsistency?",a:"'Absence makes the heart grow fonder' AND 'out of sight, out of mind' held simultaneously without noticing the contradiction"},
+{id:"s029",subject:"Sociology I",topic:"The Discipline",q:"C. Wright Mills's sociological imagination?",a:"Linking personal troubles to public issues; locating individual biography within historical structure"},
+{id:"s030",subject:"Sociology I",topic:"The Discipline",q:"Which work demonstrates that class analysis requires deep historical grounding?",a:"Barrington Moore's Social Origins of Dictatorship and Democracy"},
+{id:"s031",subject:"Sociology I",topic:"The Discipline",q:"Which school used sociological categories to transform historiography?",a:"Marc Bloch and the Annales School"},
+{id:"s032",subject:"Sociology I",topic:"The Discipline",q:"Braudel's approach bridging temporal depth with structural analysis?",a:"Longue durée"},
+{id:"s033",subject:"Sociology I",topic:"The Discipline",q:"Granovetter's concept bridging economics and sociology?",a:"'Embeddedness' — markets are socially embedded"},
+{id:"s034",subject:"Sociology I",topic:"The Discipline",q:"How does sociology differ from political science on power?",a:"Political science focuses on the state and formal institutions; sociology studies power in all social institutions — family, religion, workplace, caste"},
+{id:"s035",subject:"Sociology I",topic:"The Discipline",q:"Example distinguishing political scientist from sociologist on the 73rd Amendment?",a:"A political scientist studies its institutional design; a sociologist studies its social consequences (Sarpanch Pati, women's actual empowerment)"},
+{id:"s036",subject:"Sociology I",topic:"The Discipline",q:"Classical sociology vs anthropology — object, method, scale?",a:"Object: sociology studied 'modern' industrial societies, anthropology 'pre-modern'/non-Western (now critiqued as a colonial distinction). Method: surveys/statistics vs ethnographic fieldwork. Scale: macro-institutional vs micro-community"},
+{id:"s037",subject:"Sociology I",topic:"The Discipline",q:"Who brought social anthropological fieldwork into mainstream Indian sociology?",a:"M.N. Srinivas — Coorg study, Rampura village study"},
+{id:"s038",subject:"Sociology I",topic:"The Discipline",q:"D.P. Mukerji's enduring insistence?",a:"Studying Indian society on its own terms, not through imported Western frameworks"},
+{id:"s039",subject:"Sociology I",topic:"The Discipline",q:"Whose work exemplifies integrating global analytical tools with Indian social institutions?",a:"Surinder Jodhka's work on caste in contemporary business networks"},
+
+/* ============ SOCIOLOGY II — PERSPECTIVES ============ */
+{id:"s040",subject:"Sociology II",topic:"Perspectives — Ghurye",q:"What are the primary sources of Ghurye's Indological method?",a:"Ancient Sanskrit texts — Vedas, Puranas, Dharmashastras, Manusmriti as primary sociological data"},
+{id:"s041",subject:"Sociology II",topic:"Perspectives — Ghurye",q:"Ghurye's Caste and Race in India (1932) argued what?",a:"Caste as a segmental division of society rooted in Brahminical ritual ordering — groundwork later built upon by Dumont's Homo Hierarchicus"},
+{id:"s042",subject:"Sociology II",topic:"Perspectives — Ghurye",q:"What did Ghurye's The Scheduled Tribes (1943) argue?",a:"Tribes were 'backward Hindus' rather than isolated primitives — controversial but agenda-setting for tribal-policy debate"},
+{id:"s043",subject:"Sociology II",topic:"Perspectives — Ghurye",q:"Name Ghurye's major works.",a:"Caste and Race in India; Family and Kinship in India; The Scheduled Tribes; Indian Sadhus; Cities and Civilization; Culture and Society in India"},
+{id:"s044",subject:"Sociology II",topic:"Perspectives — Ghurye",q:"What is the core critique of Ghurye's textual reliance?",a:"Over-reliance on Brahminical/Sanskritic texts privileges elite, upper-caste voice — excludes Dalit-Bahujan oral traditions; static reading treats textual prescription as social description"},
+{id:"s045",subject:"Sociology II",topic:"Perspectives — Ghurye",q:"Béteille's critique of Ghurye?",a:"Ghurye essentialised Hinduism as coextensive with 'Indian culture', marginalising Muslim, Christian and tribal India"},
+{id:"s046",subject:"Sociology II",topic:"Perspectives — Ghurye",q:"Yogendra Singh's critique of Ghurye?",a:"Overstates continuity, understates rupture and transformation under colonial capitalism and modernity"},
+{id:"s047",subject:"Sociology II",topic:"Perspectives — Ghurye",q:"Nicholas Dirks's critique of Ghurye's caste categories?",a:"They are partly colonial-census artefacts mistaken for timeless textual truths"},
+{id:"s048",subject:"Sociology II",topic:"Perspectives — Ghurye",q:"A.R. Desai's critique of Ghurye?",a:"Neglects material/economic exploitation embedded within caste, reading it as a purely cultural-religious institution"},
+{id:"s049",subject:"Sociology II",topic:"Perspectives — Ghurye",q:"Which contemporary movement is cited as reclaiming what Ghurye's tribes-as-backward-Hindus thesis erased?",a:"Jharkhand's Pathalgadi movement; demand for a separate Sarna religious code in the 2021 Census debate"},
+{id:"s050",subject:"Sociology II",topic:"Perspectives — Ghurye",q:"Which scholar's work fills the gap Ghurye's Hindu-centric lens left open?",a:"Imtiaz Ahmad — contemporary scholarship on Muslim social structure"},
+{id:"s051",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"Srinivas's definition of Westernization?",a:"Changes introduced into Indian society and culture as a result of over a century of British rule — spanning technology, institutions, ideology and values"},
+{id:"s052",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"Three dimensions Westernization operates across?",a:"Technological (railways, printing press, modern administration); Institutional (legal system, bureaucracy, parliamentary democracy); Ideological (equality, liberty, humanitarianism)"},
+{id:"s053",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"Srinivas's two sub-types of Westernization?",a:"Primary Westernization (elite, English-educated) vs secondary Westernization (diffused, indirect)"},
+{id:"s054",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"Homi Bhabha's corrective to one-directional Westernization?",a:"Hybridity — cultures negotiate and hybridise influence, producing new forms rather than pure imitation"},
+{id:"s055",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"Six features of Srinivas's dominant caste?",a:"Numerical strength; economic power (control over arable land); political influence; educational advancement; ritual status; control over resources and labour (jajmani logic)"},
+{id:"s056",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"Examples of contemporary dominant castes?",a:"Jats in Haryana, Marathas in Maharashtra, Reddys/Kammas in Andhra Pradesh, Patels in Gujarat"},
+{id:"s057",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"Which agitations show numerically dominant but economically anxious castes seeking state recognition?",a:"Maratha and Patel reservation-quota agitations (2016-18)"},
+{id:"s058",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"How has dominance shifted beyond land and ritual?",a:"Political mobilisation of numerically large but ritually low castes — rise of BSP under Kanshi Ram and Mayawati; OBC political ascendancy in the Mandal-era realignment"},
+{id:"s059",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"Srinivas's theoretical roots in structural functionalism?",a:"Durkheim's division of labour, Radcliffe-Brown's structural anthropology, Parsonian systems theory"},
+{id:"s060",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"How is Sanskritization framed functionally?",a:"A functional safety-valve allowing status mobility without disrupting the overall caste structure"},
+{id:"s061",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"How is the jajmani system read in structural-functional terms?",a:"A reciprocal, functionally integrated economic-social exchange between service and patron castes"},
+{id:"s062",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"Srinivas's methodological corrective to Ghurye?",a:"'Field-view vs book-view' distinction"},
+{id:"s063",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"Béteille's critique of structural-functionalism?",a:"Reduces individuals to structural 'cogs,' denying agency"},
+{id:"s064",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"David Pocock's critique of functionalism?",a:"Urges critical examination of whose interests structural 'functions' actually serve, rather than assuming functions serve society as a whole"},
+{id:"s065",subject:"Sociology II",topic:"Perspectives — Srinivas",q:"Feminist critique of Srinivas?",a:"Gender blindness — caste-kinship focus leaves gender as a structural axis largely unexamined; khap-style community policing of women's mobility exposes this"},
+{id:"s066",subject:"Sociology II",topic:"Perspectives — Desai",q:"Desai's classic work?",a:"Social Background of Indian Nationalism"},
+{id:"s067",subject:"Sociology II",topic:"Perspectives — Desai",q:"Central elements of Desai's Marxist sociology?",a:"Class analysis (economic base determines social structure); historical materialism; critique of colonialism as causing economic underdevelopment"},
+{id:"s068",subject:"Sociology II",topic:"Perspectives — Desai",q:"How does Desai read Indian nationalism?",a:"As a non-homogenous movement fractured by conflicting class interests, not a unified anti-colonial front"},
+{id:"s069",subject:"Sociology II",topic:"Perspectives — Desai",q:"Desai's theory of the state?",a:"State as an instrument of class domination, serving ruling-class interests both under colonial rule and after Independence"},
+{id:"s070",subject:"Sociology II",topic:"Perspectives — Desai",q:"T.K. Oommen's critique of Desai?",a:"The Marxist framework gives insufficient weight to caste, community and ethnicity as independent axes"},
+{id:"s071",subject:"Sociology II",topic:"Perspectives — Desai",q:"Rajendra Singh's critique of Desai?",a:"Insufficient direct engagement with agrarian relations despite their centrality to Indian class structure"},
+{id:"s072",subject:"Sociology II",topic:"Perspectives — Desai",q:"Desai's dual reading of colonialism?",a:"Colonialism drained wealth and disrupted industry, yet paradoxically integrated India into the global capitalist economy — Ex: dismantling of Dacca muslin alongside railway construction"},
+{id:"s073",subject:"Sociology II",topic:"Perspectives — Desai",q:"Desai's critique of the Nehruvian model?",a:"Prioritising industrialisation over agriculture, marginalising the rural population; land reforms poorly implemented and manipulated by ruling classes"},
+{id:"s074",subject:"Sociology II",topic:"Perspectives — Desai",q:"Examples of agrarian class assertion vindicating Desai?",a:"Telangana peasant uprising (1946-51) and farmer protests against the 2020 farm laws"},
+{id:"s075",subject:"Sociology II",topic:"Perspectives — Desai",q:"Partha Chatterjee's critique of Desai?",a:"His view of the state as simply a class instrument is too static, missing the state's more autonomous and contested character in practice"},
+{id:"s076",subject:"Sociology II",topic:"Perspectives — Desai",q:"How does Desai read the Green Revolution dialectically?",a:"Aimed at food self-sufficiency but simultaneously deepened indebtedness among small farmers — Ex: Punjab's prosperity coexisting with its farm-debt and agrarian-distress crisis"},
+{id:"s077",subject:"Sociology II",topic:"Perspectives — Desai",q:"Desai's dialectical reading of the Indian Railways?",a:"Brought modern infrastructure and mobility, yet simultaneously functioned as an extraction mechanism deepening class division"},
+{id:"s078",subject:"Sociology II",topic:"Perspectives — Desai",q:"Class dialectic within the Civil Disobedience Movement?",a:"Drew together an urban bourgeoisie seeking business autonomy and a rural peasantry seeking land reform and tax relief — a shared anti-colonial front concealing divergent class ends"},
+
+/* ============ SOCIOLOGY II — COLONIAL RULE ============ */
+{id:"s079",subject:"Sociology II",topic:"Colonial Rule",q:"Benedict Anderson's two key concepts used for Indian nationalism?",a:"'Imagined community' thesis and print-capitalism — newspapers and periodicals manufactured a shared reading public transcending region"},
+{id:"s080",subject:"Sociology II",topic:"Colonial Rule",q:"Sumit Sarkar on folk culture and nationalism?",a:"Folk culture (songs, street plays) as a vernacular vehicle carrying the nationalist message to non-literate masses"},
+{id:"s081",subject:"Sociology II",topic:"Colonial Rule",q:"Which Tilak initiatives converted religious observance into public nationalist assembly?",a:"Ganeshotsav and Shivaji festivals"},
+{id:"s082",subject:"Sociology II",topic:"Colonial Rule",q:"Weber's concept applied to Gandhi?",a:"Charismatic authority — transformed an elite movement into mass politics through Swaraj and non-violent civil disobedience"},
+{id:"s083",subject:"Sociology II",topic:"Colonial Rule",q:"Ranajit Guha's subaltern studies argument?",a:"Marginalised groups (peasants, Dalits) generated their own autonomous nationalist consciousness, not simply following elite leadership"},
+{id:"s084",subject:"Sociology II",topic:"Colonial Rule",q:"R.P. Dutt's work and argument?",a:"India Today — British colonialism introduced capitalist relations of production, restructuring India's economy for metropolitan extraction"},
+{id:"s085",subject:"Sociology II",topic:"Colonial Rule",q:"E.M.S. Namboodiripad's argument on class consciousness?",a:"Colonial exploitation forged shared class consciousness across bourgeoisie, peasants and working class, each recognising a common structural oppressor"},
+{id:"s086",subject:"Sociology II",topic:"Colonial Rule",q:"Marxist critiques of the nationalist movement itself?",a:"Bourgeois-leadership critique (Congress pursued its own class interest); ideological-constraint critique (left caste and class inequality unaddressed); land-reform critique (later manifesting in the Naxalite movement)"},
+{id:"s087",subject:"Sociology II",topic:"Modernization",q:"Yogendra Singh's three traditional structures?",a:"Hierarchical (caste/stratification), sacred (religious-spiritual), regional (linguistic-cultural)"},
+{id:"s088",subject:"Sociology II",topic:"Modernization",q:"Singh's original concepts contributed to modernization theory?",a:"Selective traditionality; distinguished westernization from modernization; rationalisation of tradition; indigenization of modernity"},
+{id:"s089",subject:"Sociology II",topic:"Modernization",q:"What is 'selective traditionality'?",a:"Societies retain certain traditional elements while modifying or discarding others, rather than wholesale replacement"},
+{id:"s090",subject:"Sociology II",topic:"Modernization",q:"What institutional example embodies indigenization for Singh?",a:"The Indian Constitution — blend of traditional consensus-building values with modern democratic principles"},
+{id:"s091",subject:"Sociology II",topic:"Modernization",q:"Dipankar Gupta's critique of Singh?",a:"Singh's account tends toward an overly harmonious picture of integration, underplaying conflict"},
+{id:"s092",subject:"Sociology II",topic:"Modernization",q:"Sudipta Kaviraj's critique of Singh?",a:"The integration of tradition and modernity is far more conflictual and uneven than Singh's account suggests"},
+{id:"s093",subject:"Sociology II",topic:"Modernization",q:"Béteille's dialectical corrective to Singh?",a:"Tradition-modernity interaction is non-linear and more contested; traditional structures are more rigid than Singh assumes"},
+{id:"s094",subject:"Sociology II",topic:"Modernization",q:"Which contemporary phenomena fall outside Singh's original schema?",a:"Digital economy and platform capitalism (UPI, gig work) — showing the thesis's temporal limits"},
+{id:"s095",subject:"Sociology II",topic:"Modernization",q:"Arjun Appadurai's warning about globalisation?",a:"Homogenisation risk — globalisation flattening cultural diversity"},
+{id:"s096",subject:"Sociology II",topic:"Modernization",q:"Ramachandra Guha's critique of modernization?",a:"Traditional sustainable practices are displaced by blind modernization, producing ecological damage"},
+{id:"s097",subject:"Sociology II",topic:"Modernization",q:"Eisenstadt on tradition and modernity?",a:"Traditions are not static but continuously adapt; modernity itself takes distinct forms in different societies ('multiple modernities')"},
+{id:"s098",subject:"Sociology II",topic:"Modernization",q:"Zygmunt Bauman on modernity's displacement?",a:"Modernity's displacement of traditional practice can produce marginalisation — Ex: traditional weavers displaced by machine-made fabric"},
+{id:"s099",subject:"Sociology II",topic:"Modernization",q:"Roland Robertson's concept of glocalization, with example?",a:"Bollywood fuses global cinematic technique with deeply traditional narrative content"},
+{id:"s100",subject:"Sociology II",topic:"Modernization",q:"Redfield's framework adapted to India by Srinivas?",a:"Little Tradition (local folk practice, rural in origin) and Great Tradition (classical, pan-Indian, wider civilizational reach)"},
+{id:"s101",subject:"Sociology II",topic:"Modernization",q:"Examples of cultural revivalism in performing arts?",a:"Kathakali (Kerala Kalamandalam, UNESCO recognition); Dhrupad (Gundecha Brothers, Dagar family); Jatra (Bengal) and Tamasha (Maharashtra); Pandavani (Teejan Bai)"},
+{id:"s102",subject:"Sociology II",topic:"Modernization",q:"Examples of revivalism in language dissemination?",a:"Samskrita Bharati (Sanskrit); Ganesh Devy's People's Linguistic Survey of India; Central Institute of Classical Tamil; Kodava community-level teaching"},
+{id:"s103",subject:"Sociology II",topic:"Modernization",q:"Examples of revivalism in arts and crafts?",a:"Kalamkari; Khadi (Sabyasachi Mukherjee); Kumhar Sashaktikaran Yojana (pottery); Madhubani painting; Phulkari embroidery"},
+{id:"s104",subject:"Sociology II",topic:"Reform Movements",q:"Satyashodhak Samaj — founder, year, aim?",a:"Jyotirao Phule, 1873 — asserted the right to interpret religious texts independently, sought to liberate lower castes from Brahmin ritual monopoly"},
+{id:"s105",subject:"Sociology II",topic:"Reform Movements",q:"Brahmo Samaj — founder, year, key achievement?",a:"Raja Ram Mohan Roy, 1828 — 'Father of the Indian Renaissance'; activism against Sati culminated in Lord Bentinck's 1829 Regulation XVII"},
+{id:"s106",subject:"Sociology II",topic:"Reform Movements",q:"Arya Samaj — founder, year, motto?",a:"Swami Dayananda Saraswati, 1875 — 'Back to the Vedas'; Shuddhi (reconversion) movement"},
+{id:"s107",subject:"Sociology II",topic:"Reform Movements",q:"What was the Tinkathia system?",a:"Peasants coerced into cultivating indigo on three-twentieths of their landholding, leaving insufficient land for subsistence crops"},
+{id:"s108",subject:"Sociology II",topic:"Reform Movements",q:"Champaran Satyagraha — year and significance?",a:"1917 — established Gandhi as a genuine mass leader and validated Satyagraha as an effective political method"},
+{id:"s109",subject:"Sociology II",topic:"Reform Movements",q:"Tebhaga Movement — years, demand, leadership?",a:"1946-47; demand to shift crop-sharing from one-half to two-thirds in favour of the cultivating peasant; Kisan Sabha and CPI leadership. Ranajit Guha termed it a 'revolutionary peasant movement'"},
+{id:"s110",subject:"Sociology II",topic:"Reform Movements",q:"Bengal's three-tiered agrarian system in Tebhaga?",a:"Zamindars, jotedars and bargadars (sharecroppers)"},
+{id:"s111",subject:"Sociology II",topic:"Reform Movements",q:"Daniel Thorner on Tebhaga?",a:"The movement's echoes directly stimulated post-independence land-reform legislation"},
+{id:"s112",subject:"Sociology II",topic:"Reform Movements",q:"Name the major pre-independence reform movements and founders.",a:"Brahmo Samaj (Roy, 1828); Arya Samaj (Dayanand, 1875); Prarthana Samaj (Maharashtra); Theosophical Society (Annie Besant); Ramakrishna Mission (Vivekananda); Aligarh Movement (Sir Syed Ahmed Khan); Self-Respect Movement (Periyar); Ahmadiyya Movement (Mirza Ghulam Ahmad)"},
+{id:"s113",subject:"Sociology II",topic:"Untouchability",q:"Gandhi vs Ambedkar on untouchability?",a:"Gandhi's Harijan terminology and Harijan Sevak Sangh — later critiqued by Ambedkar for its paternalism. Ambedkar founded Scheduled Castes Federation and Independent Labour Party; led mass conversion to Buddhism"},
+{id:"s114",subject:"Sociology II",topic:"Untouchability",q:"Legal architecture against untouchability?",a:"Article 17 abolishes untouchability; Protection of Civil Rights Act (1955); SC/ST (Prevention of Atrocities) Act (1989); reservation system"},
+{id:"s115",subject:"Sociology II",topic:"Colonial Construction",q:"Edward Said's Orientalism applied to colonial India?",a:"Colonial administrators and intellectuals manufactured an image of the East as exotic, irrational and backward, justifying colonial rule as a civilising mission"},
+{id:"s116",subject:"Sociology II",topic:"Colonial Construction",q:"How did legal codification reinforce traditionalism?",a:"Codification of Hindu personal law hardened caste boundaries rather than reflecting their historical flexibility; British patronage of landlords and priests strengthened regressive hierarchies"},
+{id:"s117",subject:"Sociology II",topic:"Colonial Construction",q:"Macaulay's formulation on education?",a:"Producing a class 'Indian in blood and colour, but English in taste'"},
+
+/* ============ SOCIOLOGY II — TRIBAL COMMUNITIES ============ */
+{id:"s118",subject:"Sociology II",topic:"Tribal Communities",q:"Tribal share of India's population (Census 2011)?",a:"8.6%"},
+{id:"s119",subject:"Sociology II",topic:"Tribal Communities",q:"Features distinguishing tribal communities?",a:"Geographical isolation (Elwin); distinct cultural practices (Geertz's 'local knowledge'); communal land ownership (Marx's primitive communism); kinship-based structure (N.K. Bose); animism/nature worship (Durkheim's totemism); self-sufficient economy; distinct political organisation"},
+{id:"s120",subject:"Sociology II",topic:"Tribal Communities",q:"Examples of communal land ownership and tribal political organisation?",a:"Munda khuntkatti system in Jharkhand; Naga 'Khel' councils; Munda Parha system"},
+{id:"s121",subject:"Sociology II",topic:"Tribal Communities",q:"F.G. Bailey's concept blurring tribe boundaries?",a:"Tribe-caste continuum — boundaries blurred in Odisha, Chhattisgarh"},
+{id:"s122",subject:"Sociology II",topic:"Tribal Communities",q:"Appadurai's concept on fluid tribal identity?",a:"'Ethnoscapes' — tribal identities are fluid and actively reconstructed"},
+{id:"s123",subject:"Sociology II",topic:"Tribal Communities",q:"Which Article defines STs, and on what basis?",a:"Article 366(25) — through political-administrative, not sociological, criteria"},
+{id:"s124",subject:"Sociology II",topic:"Tribal Communities",q:"Colonial distortions of indigenous identity?",a:"Risley's racial classification and the Criminal Tribes Act (1871)"},
+{id:"s125",subject:"Sociology II",topic:"Tribal Communities",q:"Walter Fernandes on displacement?",a:"~3 crore displaced in 50 years, 42% tribal"},
+{id:"s126",subject:"Sociology II",topic:"Tribal Communities",q:"Bourdieu's concept applied to cultural erosion among tribes?",a:"'Symbolic violence' — Ex: Gondi language decline"},
+{id:"s127",subject:"Sociology II",topic:"Tribal Communities",q:"Ghurye's three-fold classification of tribes?",a:"Hinduized, Partially Hinduized and Hill tribes"},
+{id:"s128",subject:"Sociology II",topic:"Tribal Communities",q:"How did the GOI Act 1935 structure segregation?",a:"'Excluded Areas' (autonomous, minimal interference) and 'Partially Excluded Areas' (limited intervention); Governor's discretionary powers; indirect rule through hereditary chiefs"},
+{id:"s129",subject:"Sociology II",topic:"Tribal Communities",q:"Inner Line Regulations year and purpose?",a:"1873 — restricted outsider entry"},
+{id:"s130",subject:"Sociology II",topic:"Tribal Communities",q:"Which uprisings did colonial segregation seek to prevent recurrence of?",a:"Santhal, Munda, Kol uprisings"},
+{id:"s131",subject:"Sociology II",topic:"Tribal Communities",q:"Elwin's evolved position beyond isolationism?",a:"'Philosophy of Neighbourliness' — middle path between isolation and forced integration; tribals should choose what to adopt from mainstream"},
+{id:"s132",subject:"Sociology II",topic:"Tribal Communities",q:"Nehru's Panchsheel principle on tribes?",a:"Respect rights, don't impose, work through their institutions — 'develop along lines of their own genius'"},
+{id:"s133",subject:"Sociology II",topic:"Tribal Communities",q:"Which tribes did Elwin work among?",a:"Baigas, Gonds, Maria tribes"},
+{id:"s134",subject:"Sociology II",topic:"Tribal Communities",q:"Niyamgiri Gram Sabha (2013) significance?",a:"Dongria Kondh rejecting Vedanta mining — vindicates Elwin's emphasis on tribal voice; exemplifies ideal integration"},
+{id:"s135",subject:"Sociology II",topic:"Tribal Communities",q:"Which village exemplifies Gram Sabha-led community forest management?",a:"Mendha-Lekha village (Maharashtra)"},
+{id:"s136",subject:"Sociology II",topic:"Tribal Communities",q:"Key legal frameworks balancing integration and autonomy?",a:"Fifth Schedule (Scheduled Areas); Sixth Schedule (autonomous councils in NE); PESA (1996); FRA (2006); Inner Line Permit"},
+{id:"s137",subject:"Sociology II",topic:"Tribal Communities",q:"Bina Agarwal on forest rights?",a:"Legal rights enhance economic status — Ex: Soliga tribe (Karnataka) marketing honey and lichen"},
+{id:"s138",subject:"Sociology II",topic:"Tribal Communities",q:"Nandini Sundar's critique on FRA/PESA?",a:"Robust implementation needed; PESA and FRA poorly enforced"},
+{id:"s139",subject:"Sociology II",topic:"Tribal Communities",q:"Tribal Sub Plan — year initiated and purpose?",a:"1974 — channels plan funds proportionate to tribal population for socio-economic development"},
+{id:"s140",subject:"Sociology II",topic:"Tribal Communities",q:"PVTG — when created and defining features?",a:"1973, renamed 2006. Features: pre-agricultural technology, fragile economic base, low literacy, stagnant/declining population, physical isolation"},
+{id:"s141",subject:"Sociology II",topic:"Tribal Communities",q:"How many PVTGs and where?",a:"75 PVTGs across 18 states and one UT"},
+{id:"s142",subject:"Sociology II",topic:"Tribal Communities",q:"Examples of demographically vulnerable PVTGs?",a:"Great Andamanese fewer than 50; Sentinelese of North Sentinel Island; Chenchus (AP/Telangana) with deep forest-ecology knowledge"},
+{id:"s143",subject:"Sociology II",topic:"Tribal Communities",q:"Colonial illustration of religious change among tribes?",a:"Welsh Presbyterian Mission in 19th-century Meghalaya — Khasis embraced Christianity but retained traditional rituals (syncretic practice); similar among Mizo, Naga"},
+{id:"s144",subject:"Sociology II",topic:"Tribal Communities",q:"Post-independence illustration of tribal religious revival?",a:"Jharkhand Movement — revitalising Sarna religion; Jharkhand Assembly (2020) resolution for Sarna Census code; Birsa Munda's Ulgulan (1899-1900)"},
+{id:"s145",subject:"Sociology II",topic:"Tribal Communities",q:"Contemporary tribal religious codification movements?",a:"Codification of Gondi religion; Sari Dhorom movement among Santhals. Tension: codification may standardise what was fluid"},
+{id:"s146",subject:"Sociology II",topic:"Ethnicity",q:"Barth's contribution to ethnicity theory?",a:"Ethnic boundaries maintained through interaction, not isolation; differences emphasised to legitimise governance demands"},
+{id:"s147",subject:"Sociology II",topic:"Ethnicity",q:"Hechter's Internal Colonialism thesis?",a:"Periphery's exploitation generates ethnically framed resistance — Ex: Jharkhand, Chhattisgarh tribal movements against industrial projects"},
+{id:"s148",subject:"Sociology II",topic:"Ethnicity",q:"McCarthy & Zald's theory applied to ethnic conflict?",a:"Resource mobilisation theory — ethnic narrative rallies support for resource control"},
+{id:"s149",subject:"Sociology II",topic:"Ethnicity",q:"Sumner's concept and its conflict mechanism?",a:"Ethnocentrism — belief in the inherent superiority of one's own ethnic group"},
+{id:"s150",subject:"Sociology II",topic:"Ethnicity",q:"Stuart Hall's mechanism of conflict?",a:"'Othering' — representation creates us-vs-them divisions"},
+{id:"s151",subject:"Sociology II",topic:"Ethnicity",q:"Michael Mann's work on ethnic violence?",a:"'The Dark Side of Democracy' — political instrumentalisation of ethnicity"},
+{id:"s152",subject:"Sociology II",topic:"Ethnicity",q:"Putnam's concern about ethnic isolation?",a:"Ethnic isolation erodes social capital; cross-ethnic social capital building is the corrective"},
+{id:"s153",subject:"Sociology II",topic:"Ethnicity",q:"Vertovec's concept on migration?",a:"'Super-diversity'"},
+{id:"s154",subject:"Sociology II",topic:"Ethnicity",q:"Rajni Kothari on identity politics?",a:"Ethnicity-politics nexus threatens social harmony; electoral politics promotes identity-based mobilisation. Also theorised the 'Congress System' (1950s-70s)"},
+{id:"s155",subject:"Sociology II",topic:"Ethnicity",q:"Ashutosh Varshney's focus?",a:"Communal violence — recurring conflicts from Partition onward"},
+{id:"s156",subject:"Sociology II",topic:"Ethnicity",q:"Anthony D. Smith on ethno-nationalism?",a:"Draws on historical identities for political mobilisation; 'sons of the soil' movements"},
+{id:"s157",subject:"Sociology II",topic:"Ethnicity",q:"Mamdani on decolonisation legacies?",a:"Colonial 'divide and rule' left lasting effects — Ex: Rwanda, Belgian exacerbation of Hutu-Tutsi differences"},
+{id:"s158",subject:"Sociology II",topic:"Ethnicity",q:"Felix Padel and Virginius Xaxa's emphasis?",a:"Recognise the tribe-environment relationship in policy"},
+{id:"s159",subject:"Sociology II",topic:"Ethnicity",q:"B.K. Roy Burman's argument on autonomy?",a:"Cultural factors drive autonomy demands; integration imposes mainstream values; tribal regions resource-rich but tribals impoverished"},
+{id:"s160",subject:"Sociology II",topic:"Ethnicity",q:"Goffman and Stanley Freed on integration challenges?",a:"Goffman's stigma — tribal identity as disadvantage; Stanley Freed — cultural dilution creates an identity vacuum"},
+{id:"s161",subject:"Sociology II",topic:"Ethnicity",q:"Gail Omvedt on ethnic movements?",a:"Economic inequalities spur Dalit/Adivasi movements"},
+{id:"s162",subject:"Sociology II",topic:"Ethnicity",q:"Which forms has identity politics taken in India?",a:"Language-based (Paul Brass: DMK, Shiv Sena); Gender (Nivedita Menon: Women's Reservation Bill); Mass mobilisation (Atul Kohli: AAP); Eco-politics (Ramachandra Guha: Chipko); Tribal identity (Jharkhand/Chhattisgarh); Communist (K.N. Raj: Kerala, West Bengal)"}
+
+];
+
+</script>
+<script type="module">
+let initializeApp,getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged,
+    getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot;
+async function loadFirebase(){
+  const B="https://www.gstatic.com/firebasejs/10.12.2/";
+  const [a,b,c] = await Promise.all([import(B+"firebase-app.js"),import(B+"firebase-auth.js"),import(B+"firebase-firestore.js")]);
+  initializeApp=a.initializeApp;
+  ({getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}=b);
+  ({getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot}=c);
+}
+
+/* ---------------------------------------------------------- constants */
+const D = window.APP_DATES;
+const PHASES = [
+  {id:"A", name:"Mains depth",        until:D.phaseBStart, iv:[3,10,30,75]},
+  {id:"B", name:"Prelims sprint",     until:D.phaseCStart, iv:[2,7,21,45]},
+  {id:"C", name:"Mains consolidation",until:"2099-01-01",  iv:[3,10,30,75]}
+];
+const STATES = [["reading","Reading"],["notes","Notes done"],["revised","Revised"],["hidden","Hidden (backlog)"]];
+const PAPERS = Object.keys(window.SYLLABUS);
+const DAY = 86400000;
+
+/* ---------------------------------------------------------- date utils */
+const today0 = () => { const d=new Date(); d.setHours(0,0,0,0); return d.getTime(); };
+const parseD = s => { if(!s) return null; const d=new Date(s+"T00:00:00"); return isNaN(d)?null:d.getTime(); };
+const iso = ms => new Date(ms).toISOString().slice(0,10);
+const fmt = ms => ms==null ? "—" :
+  new Date(ms).getDate()+" "+new Date(ms).toLocaleString("en-GB",{month:"short"})+" "+String(new Date(ms).getFullYear()).slice(2);
+const rel = ms => { const d=Math.round((ms-today0())/DAY);
+  return d===0?"today":d===1?"tomorrow":d===-1?"1 day late":d<0?Math.abs(d)+" days late":"in "+d+" days"; };
+const within = (s,n) => { const t=parseD(s); return t!=null && t<=today0() && t>today0()-n*DAY; };
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = v => { const n=parseFloat(v); return isNaN(n)?0:n; };
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function phase(){ const t=today0(); for(const p of PHASES){ if(t < parseD(p.until)) return p; } return PHASES[2]; }
+function weekStart(ms){ const d=new Date(ms); const k=(d.getDay()+6)%7; return iso(ms-k*DAY); }
+
+/* ---------------------------------------------------------- state */
+let items = {};              // id -> record
+let view = "today";
+let user = null, db = null, cloud = false;
+let filters = {q:"",paper:"",state:""};
+let quiz = null;
+
+/* ---------------------------------------------------------- storage */
+const LKEY = "upsc-cc-v1";
+function localLoad(){ try{ items = JSON.parse(localStorage.getItem(LKEY)||"{}"); }catch(e){ items={}; } }
+function localSave(){ try{ localStorage.setItem(LKEY, JSON.stringify(items)); }catch(e){} }
+
+async function put(rec){
+  if(!rec.id) rec.id = uid();
+  items[rec.id] = rec; render();
+  if(cloud && user){
+    const {id,...body} = rec;
+    try{ await setDoc(doc(db,"users",user.uid,"items",id), body); }
+    catch(e){ note("Save failed — check your connection.", true); }
+  } else localSave();
+  return rec;
+}
+async function drop(id){
+  delete items[id]; render();
+  if(cloud && user){ try{ await deleteDoc(doc(db,"users",user.uid,"items",id)); }catch(e){} }
+  else localSave();
+}
+const all = type => Object.values(items).filter(r=>r.type===type);
+const one = id => items[id];
+
+/* ---------------------------------------------------------- revision engine */
+function cycles(t){
+  const base = parseD(t.started); if(base==null) return [];
+  const iv = phase().iv;
+  return iv.map((off,i)=>{
+    const due = base + off*DAY, done = !!(t.done&&t.done[i]);
+    return {i,due,done,label:"R"+(i+1),
+      status: done?"done": due<today0()?"late": due===today0()?"due":"soon"};
+  });
+}
+const nextCycle = t => cycles(t).find(c=>!c.done) || null;
+const activeTopics = () => all("topic").filter(t=>t.state && t.state!=="hidden" && t.started);
+function dueList(){
+  const out=[];
+  activeTopics().forEach(t=>{ const c=nextCycle(t); if(c && c.status!=="soon") out.push({t,c}); });
+  return out.sort((a,b)=>a.c.due-b.c.due);
+}
+function magCycles(m){
+  const base = parseD(m.end); if(base==null || !m.end) return [];
+  return [15,45].map((off,i)=>{
+    const due=base+off*DAY, done=!!(m.done&&m.done[i]);
+    return {i,due,done,label:"R"+(i+1),
+      status: done?"done": due<today0()?"late": due===today0()?"due":"soon"};
+  });
+}
+function magDue(){
+  const out=[];
+  all("mag").forEach(m=>{ const c=magCycles(m).find(x=>!x.done); if(c && c.status!=="soon") out.push({m,c}); });
+  return out.sort((a,b)=>a.c.due-b.c.due);
+}
+
+/* ---------------------------------------------------------- syllabus helpers */
+function syllabusKey(p,s,t){ return p+"||"+s+"||"+t; }
+function topicFor(p,s,t){
+  return all("topic").find(r=>r.paper===p&&r.subject===s&&r.topic===t) || null;
+}
+function coverage(paper){
+  let total=0, done=0, hidden=0;
+  const subs = window.SYLLABUS[paper];
+  for(const s in subs) for(const t of subs[s]){
+    const r = topicFor(paper,s,t);
+    if(r && r.state==="hidden"){ hidden++; continue; }
+    total++;
+    if(r && (r.state==="notes"||r.state==="revised")) done++;
+  }
+  return {total,done,hidden,pct: total? Math.round(done/total*100):0};
+}
+
+/* ---------------------------------------------------------- render shell */
+function note(msg, bad){
+  const el=document.getElementById("who");
+  el.textContent=msg; el.style.color = bad?"var(--late)":"";
+  if(bad) setTimeout(whoLine,4000);
+}
+function whoLine(){
+  const el=document.getElementById("who"); el.style.color="";
+  if(cloud && user) el.innerHTML = "Signed in as "+esc(user.email||"you")+" · synced across devices · <button data-act='signout'>Sign out</button>";
+  else if(cloud) el.innerHTML = "<button data-act='signin'>Sign in with Google</button> to sync across your devices.";
+  else el.textContent = "Saving to this browser only — add your Firebase keys in data/config.js to sync.";
+}
+function countdown(){
+  const t=today0(), ye=parseD(D.yearEnd), pre=parseD(D.prelims);
+  let n, l;
+  if(t<=ye){ n=Math.round((ye-t)/DAY); l="days to 31 December"; }
+  else { n=Math.round((pre-t)/DAY); l = n>=0 ? "days to Prelims" : "days since Prelims"; n=Math.abs(n); }
+  document.getElementById("cdN").textContent=n;
+  document.getElementById("cdL").textContent=l;
+  const p=phase();
+  document.getElementById("phase").textContent="Phase "+p.id+" · "+p.name;
+}
+function render(){
+  countdown();
+  const d = dueList().length + magDue().length;
+  const b=document.getElementById("bDue"); b.textContent=d; b.classList.toggle("hide",d===0);
+  document.querySelectorAll("#nav button").forEach(x=>x.setAttribute("aria-selected",String(x.dataset.v===view)));
+  const m=document.getElementById("main");
+  m.innerHTML = ({today:vToday,syllabus:vSyllabus,revision:vRevision,daily:vDaily,
+                  answers:vAnswers,ca:vCA,quiz:vQuiz,progress:vProgress})[view]();
+  document.getElementById("footnote").textContent =
+    "Phase "+phase().id+" revision intervals: "+phase().iv.join(", ")+" days after the date you first studied a topic. "
+    +"Intervals switch automatically on "+D.phaseBStart+" and "+D.phaseCStart+".";
+  restoreFilters();
+}
+
+/* ---------------------------------------------------------- TODAY */
+function vToday(){
+  const due=dueList(), mags=magDue();
+  const days7 = all("day").filter(d=>within(d.date,7));
+  const hrs = days7.reduce((s,d)=>s+(d.slots||[]).reduce((a,x)=>a+num(x.hrs),0),0);
+  const act = days7.reduce((s,d)=>s+(d.slots||[]).filter(x=>x.mode==="active").reduce((a,x)=>a+num(x.hrs),0),0);
+  const ans7 = all("answer").filter(a=>within(a.date,7)).length;
+  const days30 = all("day").filter(d=>within(d.date,30)).length;
+  const target = (one("settings")||{}).answerTarget || 14;
+  const todayRec = all("day").find(d=>d.date===iso(today0()));
+
+  let h = '<div class="stats">'
+    + stat(due.length+mags.length,"Due for revision",due.length+mags.length>0?"alert":"")
+    + stat(hrs.toFixed(1),"Hours, last 7 days")
+    + stat(hrs?Math.round(act/hrs*100)+"%":"—","Active learning")
+    + stat(ans7+" / "+target,"Answers this week",ans7>=target?"good":"")
+    + stat(days30,"Days studied of last 30")
+    + '</div>';
+
+  h += '<section><h2>Revise now</h2><p class="hint">Overdue first, then due today. Mark one done and it drops off.</p>';
+  if(!due.length && !mags.length){
+    h += '<div class="empty"><strong>Nothing owed right now</strong>'
+      + (activeTopics().length? 'Next revision is further out. Good place to start a new topic.'
+        : 'Open the Syllabus tab and mark a topic as Reading — its revision dates schedule themselves.')+'</div>';
+  } else {
+    h += '<div class="queue">'
+      + due.map(r=>qrow(r.t.topic, r.t.paper+" · "+r.t.subject, r.c, "mark", r.t.id)).join("")
+      + mags.map(r=>qrow(r.m.name, "Current affairs · "+(r.m.subject||""), r.c, "markmag", r.m.id)).join("")
+      + '</div>';
+  }
+  h += '</section>';
+
+  h += '<section><h2>Log today</h2><p class="hint">Two minutes. Tag each slot active or passive — that ratio matters more than the hours.</p>'
+    + dayForm(todayRec) + '</section>';
+  return h;
+}
+function stat(n,l,cls){ return '<div class="stat '+(cls||"")+'"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
+function qrow(title,sub,c,act,id){
+  return '<div class="row"><span class="tag '+(c.status==="late"?"late":"due")+'">'+c.label+'</span>'
+    +'<div class="meta"><div class="t">'+esc(title)+'</div><div class="s">'+esc(sub)+' · due '+fmt(c.due)+' ('+rel(c.due)+')</div></div>'
+    +'<button class="btn small" data-act="'+act+'" data-id="'+id+'" data-i="'+c.i+'">Mark done</button></div>';
+}
+
+/* ---------------------------------------------------------- SYLLABUS */
+function vSyllabus(){
+  let h = '<div class="stats">';
+  PAPERS.forEach(p=>{ const c=coverage(p); h += stat(c.pct+"%", p+" — "+c.done+"/"+c.total, c.pct>=60?"good":""); });
+  h += '</div>';
+
+  h += '<p class="hint">Click any square to set its state. Hidden topics leave the coverage denominator — that is your backlog, parked without pretending it is done.</p>';
+
+  PAPERS.forEach(p=>{
+    h += '<div class="heat"><h3>'+p+'</h3>';
+    const subs = window.SYLLABUS[p];
+    for(const s in subs){
+      h += '<div class="heatgroup"><div class="gl">'+esc(s)+'</div><div class="cells">';
+      subs[s].forEach(t=>{
+        const r = topicFor(p,s,t);
+        h += '<button class="cell" '+(r&&r.state?'data-s="'+r.state+'"':'')
+          +' title="'+esc(t)+(r&&r.state?" — "+r.state:"")+'" data-act="cell" data-key="'+esc(syllabusKey(p,s,t))+'"></button>';
+      });
+      h += '</div></div>';
+    }
+    h += '</div>';
+  });
+  h += '<div class="legend">'
+    +'<span><i style="background:var(--panel-2)"></i>Not started</span>'
+    +'<span><i style="background:var(--brass-soft);border-color:var(--brass)"></i>Reading</span>'
+    +'<span><i style="background:var(--cool-soft);border-color:var(--cool)"></i>Notes done</span>'
+    +'<span><i style="background:var(--ok);border-color:var(--ok)"></i>Revised</span>'
+    +'<span><i style="background:var(--line)"></i>Hidden / backlog</span></div>';
+  return h;
+}
+
+/* ---------------------------------------------------------- REVISION */
+function vRevision(){
+  const list = all("topic").filter(t=>t.state&&t.started).filter(t=>{
+    if(filters.paper && t.paper!==filters.paper) return false;
+    if(filters.state && t.state!==filters.state) return false;
+    if(filters.q && !((t.topic+" "+t.subject).toLowerCase().includes(filters.q.toLowerCase()))) return false;
+    return true;
+  }).sort((a,b)=>(parseD(b.started)||0)-(parseD(a.started)||0));
+
+  let h = '<div class="filters">'
+    +'<input id="fq" placeholder="Search topics" autocomplete="off">'
+    +'<select id="fp"><option value="">All papers</option>'+PAPERS.map(p=>'<option>'+p+'</option>').join("")+'</select>'
+    +'<select id="fs"><option value="">All states</option>'+STATES.map(s=>'<option value="'+s[0]+'">'+s[1]+'</option>').join("")+'</select>'
+    +'</div>';
+
+  if(!list.length) return h+'<div class="empty"><strong>Nothing in the revision engine yet</strong>A topic enters here the moment you mark it Reading on the Syllabus tab.</div>';
+
+  h += '<div class="tablewrap"><table><thead><tr><th>Topic</th><th>Paper</th><th>State</th><th>Started</th><th>Revisions</th><th></th></tr></thead><tbody>'
+    + list.map(t=>{
+        const cs = cycles(t);
+        return '<tr'+(t.state==="hidden"?' class="hidden-row"':'')+'>'
+          +'<td>'+esc(t.topic)+'<div class="s" style="font-size:12px;color:var(--muted)">'+esc(t.subject)+'</div></td>'
+          +'<td><span class="tag cool">'+esc(t.paper)+'</span></td>'
+          +'<td>'+esc((STATES.find(s=>s[0]===t.state)||["","—"])[1])+'</td>'
+          +'<td>'+fmt(parseD(t.started))+'</td>'
+          +'<td><div class="chips">'+cs.map(c=>'<button class="chip '+(c.done?"done":c.status)+'" title="'+c.label+' due '+fmt(c.due)+'" data-act="toggle" data-id="'+t.id+'" data-i="'+c.i+'">'+c.label+'</button>').join("")+'</div></td>'
+          +'<td class="inline"><button class="btn small ghost" data-act="edittopic" data-id="'+t.id+'">Edit</button>'
+          +'<button class="btn small ghost danger" data-act="del" data-id="'+t.id+'">Delete</button></td></tr>';
+      }).join("")
+    + '</tbody></table></div>';
+  return h;
+}
+
+/* ---------------------------------------------------------- DAILY */
+function dayForm(rec){
+  const slots = (rec&&rec.slots&&rec.slots.length)? rec.slots : [
+    {text:"",hrs:"",mode:"passive",label:"Slot 1 — GS"},
+    {text:"",hrs:"",mode:"passive",label:"Slot 2 — Optional"},
+    {text:"",hrs:"",mode:"active", label:"Slot 3 — CA / answers / revision"}
+  ];
+  let h = '<form class="entry" data-form="day"><input type="hidden" name="id" value="'+(rec?rec.id:"")+'">'
+    + '<div class="grid g2"><div class="f"><label>Date</label><input type="date" name="date" value="'+(rec?rec.date:iso(today0()))+'"></div>'
+    + '<div class="f"><label>How was the day? (1-5)</label><select name="mark">'
+      + [0,1,2,3,4,5].map(n=>'<option value="'+n+'"'+((rec&&+rec.mark===n)?" selected":"")+'>'+(n?n:"—")+'</option>').join("")
+      + '</select></div></div>';
+  slots.forEach((s,i)=>{
+    h += '<div class="grid g4" style="margin-top:10px">'
+      + '<div class="span2 f"><label>'+esc(s.label||("Slot "+(i+1)))+'</label>'
+        + '<input name="s'+i+'" value="'+esc(s.text)+'" placeholder="What you covered" autocomplete="off"></div>'
+      + '<div class="f"><label>Hours</label><input type="number" step="0.25" name="h'+i+'" value="'+esc(s.hrs)+'"></div>'
+      + '<div class="f"><label>Mode</label><select name="m'+i+'">'
+        + '<option value="passive"'+(s.mode!=="active"?" selected":"")+'>Passive (reading)</option>'
+        + '<option value="active"'+(s.mode==="active"?" selected":"")+'>Active (writing/recall)</option></select></div></div>';
+  });
+  h += '<div class="grid" style="margin-top:10px"><div class="f"><label>One line on the day</label>'
+    + '<input name="note" value="'+esc(rec?rec.note:"")+'" placeholder="What worked, what did not" autocomplete="off"></div></div>'
+    + '<div class="foot"><button class="btn primary" type="submit">Save day</button></div></form>';
+  return h;
+}
+function vDaily(){
+  const days = all("day").sort((a,b)=>(parseD(b.date)||0)-(parseD(a.date)||0));
+  const ws = weekStart(today0());
+  const wk = all("week").find(w=>w.weekStart===ws);
+
+  let h = dayForm(null);
+
+  h += '<section><h2>This week</h2><p class="hint">Mark the week on Sunday. Two numbers, ten seconds — their value is in the trend, not the score.</p>'
+    + '<form class="entry" data-form="week"><input type="hidden" name="id" value="'+(wk?wk.id:"")+'">'
+    + '<input type="hidden" name="weekStart" value="'+ws+'">'
+    + '<div class="grid g2"><div class="f"><label>Week of '+fmt(parseD(ws))+' (1-5)</label><select name="mark">'
+      + [0,1,2,3,4,5].map(n=>'<option value="'+n+'"'+((wk&&+wk.mark===n)?" selected":"")+'>'+(n?n:"—")+'</option>').join("")
+      + '</select></div>'
+    + '<div class="f"><label>Weekly answer target</label><input type="number" name="target" value="'+((one("settings")||{}).answerTarget||14)+'"></div></div>'
+    + '<div class="grid" style="margin-top:10px"><div class="f"><label>Week review</label>'
+      + '<input name="note" value="'+esc(wk?wk.note:"")+'" placeholder="One honest line" autocomplete="off"></div></div>'
+    + '<div class="foot"><button class="btn primary" type="submit">Save week</button></div></form></section>';
+
+  if(!days.length) return h+'<div class="empty"><strong>No days logged yet</strong>Log hours actually done, not hours planned.</div>';
+
+  h += '<div class="tablewrap"><table><thead><tr><th>Date</th><th>Slot 1</th><th>Slot 2</th><th>Slot 3</th>'
+    +'<th class="num">Hrs</th><th class="num">Active</th><th class="num">Mark</th><th></th></tr></thead><tbody>'
+    + days.map(d=>{
+        const sl=d.slots||[], tot=sl.reduce((a,x)=>a+num(x.hrs),0);
+        const a=sl.filter(x=>x.mode==="active").reduce((s,x)=>s+num(x.hrs),0);
+        return '<tr><td>'+fmt(parseD(d.date))+'</td>'
+          + sl.slice(0,3).map(x=>'<td>'+esc(x.text||"—")+'</td>').join("")
+          + (sl.length<3? '<td>—</td>'.repeat(3-sl.length):'')
+          +'<td class="num">'+tot.toFixed(1)+'</td>'
+          +'<td class="num">'+(tot?Math.round(a/tot*100)+"%":"—")+'</td>'
+          +'<td class="num">'+(d.mark?d.mark+"/5":"—")+'</td>'
+          +'<td class="inline"><button class="btn small ghost" data-act="editday" data-id="'+d.id+'">Edit</button>'
+          +'<button class="btn small ghost danger" data-act="del" data-id="'+d.id+'">Delete</button></td></tr>';
+      }).join("")
+    +'</tbody></table></div>';
+  return h;
+}
+
+/* ---------------------------------------------------------- ANSWERS */
+function vAnswers(){
+  const list = all("answer").sort((a,b)=>(parseD(b.date)||0)-(parseD(a.date)||0));
+  const target = (one("settings")||{}).answerTarget || 14;
+  const week = list.filter(a=>within(a.date,7));
+
+  const bySub = {};
+  list.forEach(a=>{ const k=a.paper||"—"; bySub[k]=(bySub[k]||0)+1; });
+  const byTopic = {};
+  list.forEach(a=>{ if(a.topic){ byTopic[a.topic]=(byTopic[a.topic]||0)+1; } });
+
+  let h = '<div class="stats">'
+    + stat(week.length+" / "+target,"This week",week.length>=target?"good":"")
+    + stat(list.length,"Total written")
+    + stat(week.length?Math.round(week.reduce((s,a)=>s+num(a.score),0)/week.length*10)/10:"—","Avg self-score, week")
+    + '</div>';
+
+  h += '<form class="entry" data-form="answer"><input type="hidden" name="id" value="">'
+    + '<div class="grid g4">'
+    + fld("Date",'<input type="date" name="date" value="'+iso(today0())+'">')
+    + fld("Paper",sel("paper",PAPERS))
+    + fld("Topic tag",'<input name="topic" placeholder="Fundamental Rights" autocomplete="off">')
+    + fld("Minutes",'<input type="number" name="mins" placeholder="11">')
+    + '</div><div class="grid g4" style="margin-top:10px">'
+    + fld("Self-score (1-10)",'<input type="number" min="1" max="10" name="score" placeholder="6">')
+    + '<div class="span2">'+fld("What went wrong",'<input name="flaw" placeholder="Conclusion rushed; no case law cited" autocomplete="off">')+'</div>'
+    + '<div></div></div>'
+    + '<div class="foot"><button class="btn primary" type="submit">Log answer</button></div></form>';
+
+  if(Object.keys(bySub).length){
+    h += '<section><h2>Where your answers are going</h2><div class="two">'
+      + '<div class="card">'+barList(bySub,"By paper")+'</div>'
+      + '<div class="card">'+barList(topN(byTopic,8),"Top topics")+'</div></div></section>';
+  }
+
+  if(!list.length) return h+'<div class="empty"><strong>No answers logged</strong>One specific, fixable flaw per answer. Repeats are your real syllabus.</div>';
+
+  h += '<div class="tablewrap"><table><thead><tr><th>Date</th><th>Paper</th><th>Topic</th><th class="num">Min</th><th class="num">Score</th><th>What went wrong</th><th></th></tr></thead><tbody>'
+    + list.map(a=>'<tr><td>'+fmt(parseD(a.date))+'</td><td><span class="tag cool">'+esc(a.paper||"—")+'</span></td>'
+      +'<td>'+esc(a.topic||"—")+'</td><td class="num">'+esc(a.mins||"—")+'</td>'
+      +'<td class="num">'+(a.score?a.score+"/10":"—")+'</td><td>'+esc(a.flaw||"—")+'</td>'
+      +'<td><button class="btn small ghost danger" data-act="del" data-id="'+a.id+'">Delete</button></td></tr>').join("")
+    +'</tbody></table></div>';
+  return h;
+}
+function topN(o,n){ const e=Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,n); return Object.fromEntries(e); }
+function barList(o,title){
+  const max = Math.max(1,...Object.values(o));
+  return '<h3 style="font-size:13px;margin:0 0 9px;font-weight:600">'+title+'</h3>'
+    + Object.entries(o).map(([k,v])=>
+      '<div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">'
+      +'<span style="width:38%;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(k)+'</span>'
+      +'<span style="flex:1;height:8px;background:var(--panel-2);border-radius:4px;overflow:hidden">'
+      +'<span style="display:block;height:100%;width:'+(v/max*100)+'%;background:var(--brass)"></span></span>'
+      +'<span style="font-size:12px;color:var(--muted);width:24px;text-align:right">'+v+'</span></div>').join("")
+    || '<p class="hint">Nothing yet.</p>';
+}
+
+/* ---------------------------------------------------------- CURRENT AFFAIRS */
+function vCA(){
+  const list = all("mag").sort((a,b)=>(parseD(b.start)||0)-(parseD(a.start)||0));
+  let h = '<form class="entry" data-form="mag"><input type="hidden" name="id" value="">'
+    +'<div class="grid g4">'
+    + fld("Magazine / source",'<input name="name" placeholder="Vision Monthly" required autocomplete="off">')
+    + fld("Subject",'<input name="subject" placeholder="Polity + IR" autocomplete="off">')
+    + fld("Month",'<input name="month" placeholder="Sep 2026" autocomplete="off">')
+    + '<div></div></div><div class="grid g4" style="margin-top:10px">'
+    + fld("Start date",'<input type="date" name="start" value="'+iso(today0())+'">')
+    + fld("End date (when finished)",'<input type="date" name="end">')
+    + '<div class="span2"></div></div>'
+    +'<div class="foot"><button class="btn primary" type="submit">Add magazine</button></div></form>';
+
+  h += '<p class="hint">Two revisions schedule themselves at +15 and +45 days from the end date. Leave the end date blank while you are still reading it.</p>';
+
+  if(!list.length) return h+'<div class="empty"><strong>No magazines tracked</strong>Add the one you are reading now.</div>';
+
+  h += '<div class="tablewrap"><table><thead><tr><th>Magazine</th><th>Subject</th><th>Month</th><th>Start</th><th>End</th><th>Revisions</th><th></th></tr></thead><tbody>'
+    + list.map(m=>{
+        const cs=magCycles(m);
+        return '<tr><td>'+esc(m.name)+'</td><td>'+esc(m.subject||"—")+'</td><td>'+esc(m.month||"—")+'</td>'
+          +'<td>'+fmt(parseD(m.start))+'</td><td>'+(m.end?fmt(parseD(m.end)):'<span class="tag due">reading</span>')+'</td>'
+          +'<td><div class="chips">'+(cs.length? cs.map(c=>'<button class="chip '+(c.done?"done":c.status)+'" title="'+c.label+' due '+fmt(c.due)+'" data-act="togglemag" data-id="'+m.id+'" data-i="'+c.i+'">'+c.label+'</button>').join("") : '<span class="s" style="color:var(--muted);font-size:12px">set end date</span>')+'</div></td>'
+          +'<td class="inline"><button class="btn small ghost" data-act="editmag" data-id="'+m.id+'">Edit</button>'
+          +'<button class="btn small ghost danger" data-act="del" data-id="'+m.id+'">Delete</button></td></tr>';
+      }).join("")
+    +'</tbody></table></div>';
+  return h;
+}
+
+/* ---------------------------------------------------------- QUESTION GAME */
+function pickQuestions(){
+  const logs = all("qlog");
+  const seen = {};
+  logs.forEach(l=>{ if(!seen[l.qid] || l.date>seen[l.qid].date) seen[l.qid]=l; });
+  const t = today0();
+  const missed = window.QUESTIONS.filter(q=> seen[q.id] && !seen[q.id].ok
+      && parseD(seen[q.id].date) <= t-2*DAY);
+  const fresh  = window.QUESTIONS.filter(q=> !seen[q.id]);
+  const old    = window.QUESTIONS.filter(q=> seen[q.id] && seen[q.id].ok
+      && parseD(seen[q.id].date) <= t-21*DAY);
+  const seed = Math.floor(t/DAY);
+  const shuffle = arr => arr.map((v,i)=>[((seed*9301+i*49297)%233280),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+  return [...shuffle(missed), ...shuffle(fresh), ...shuffle(old)].slice(0,5);
+}
+function vQuiz(){
+  const doneToday = all("qlog").filter(l=>l.date===iso(today0()));
+  if(doneToday.length>=5 && !quiz){
+    const right = doneToday.filter(l=>l.ok).length;
+    return '<div class="empty"><strong>Today\'s five are done — '+right+' out of 5</strong>'
+      + (right===5? 'Clean sweep. The ones you missed earlier will come back on their own.'
+                  : 'The ones you missed come back in two days.')
+      + '</div><div style="text-align:center;margin-top:12px"><button class="btn" data-act="quizmore">Do five more anyway</button></div>'
+      + quizStats();
+  }
+  if(!quiz){ quiz = {list:pickQuestions(), i:0, shown:false, results:[]}; }
+  if(!quiz.list.length) return '<div class="empty"><strong>Question bank is empty</strong>Add questions to data/questions.js.</div>';
+
+  const q = quiz.list[quiz.i];
+  if(!q) { const r=quiz.results.filter(Boolean).length; const n=quiz.list.length; quiz=null;
+    return '<div class="empty"><strong>'+r+' out of '+n+'</strong>Come back tomorrow for five more.</div>'+quizStats(); }
+
+  let h = '<div class="qprog">'+quiz.list.map((_,i)=>
+      '<span class="qdot '+(i<quiz.i?(quiz.results[i]?"ok":"no"):(i===quiz.i?"now":""))+'"></span>').join("")+'</div>';
+  h += '<div class="qcard">'
+    + '<div class="qnum">Question '+(quiz.i+1)+' of '+quiz.list.length+' · '+esc(q.subject)+' · '+esc(q.topic)+'</div>'
+    + '<div class="qtext">'+esc(q.q)+'</div>';
+  if(quiz.shown){
+    h += '<div class="qans">'+esc(q.a)+'</div>'
+      + '<div class="inline"><button class="btn primary" data-act="qmark" data-ok="1">I knew it</button>'
+      + '<button class="btn" data-act="qmark" data-ok="0">I did not</button></div>';
+  } else {
+    h += '<button class="btn primary" data-act="qshow">Show answer</button>';
+  }
+  h += '</div><p class="hint">Answers are your own note text. Nothing here is AI-generated.</p>';
+  return h;
+}
+function quizStats(){
+  const logs=all("qlog"); if(!logs.length) return "";
+  const seen={}; logs.forEach(l=>{ if(!seen[l.qid]||l.date>seen[l.qid].date) seen[l.qid]=l; });
+  const known=Object.values(seen).filter(l=>l.ok).length;
+  return '<div class="stats" style="margin-top:18px">'
+    + stat(Object.keys(seen).length+" / "+window.QUESTIONS.length,"Questions seen")
+    + stat(known,"Currently known","good")
+    + stat(Object.values(seen).filter(l=>!l.ok).length,"To come back",
+        Object.values(seen).filter(l=>!l.ok).length?"alert":"")
+    + '</div>';
+}
+
+/* ---------------------------------------------------------- PROGRESS */
+function vProgress(){
+  let h = '<section><h2>Coverage by paper</h2><div class="card">';
+  h += '<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">'
+    + PAPERS.map(p=>ring(coverage(p).pct,p)).join("") + '</div></div></section>';
+
+  // active vs passive, last 8 weeks
+  const weeks=[];
+  for(let w=7;w>=0;w--){
+    const startMs = today0()-(w*7+((new Date().getDay()+6)%7))*DAY;
+    const days = all("day").filter(d=>{ const t=parseD(d.date); return t!=null && t>=startMs && t<startMs+7*DAY; });
+    let a=0,p=0;
+    days.forEach(d=>(d.slots||[]).forEach(s=>{ (s.mode==="active"?a+=num(s.hrs):p+=num(s.hrs)); }));
+    weeks.push({label:fmt(startMs).slice(0,6),a,p});
+  }
+  h += '<section><h2>Active vs passive hours</h2><p class="hint">Reading is not the same currency as producing. This is the number to watch.</p>'
+    + '<div class="card">'+stackChart(weeks)+'</div></section>';
+
+  // revision debt
+  const debt=[];
+  for(let d=29;d>=0;d--){
+    const t=today0()-d*DAY; let n=0;
+    activeTopics().forEach(tp=>{
+      const base=parseD(tp.started); if(base==null) return;
+      phase().iv.forEach((off,i)=>{ if(!(tp.done&&tp.done[i]) && base+off*DAY < t) n++; });
+    });
+    debt.push(n);
+  }
+  h += '<section><h2>Revision debt, last 30 days</h2><p class="hint">Overdue revisions outstanding. Down and flat is the goal.</p>'
+    + '<div class="card">'+lineChart(debt)+'</div></section>';
+
+  // self-marks
+  const marks = all("day").filter(d=>d.mark).sort((a,b)=>(parseD(a.date)||0)-(parseD(b.date)||0)).slice(-30);
+  if(marks.length>2){
+    h += '<section><h2>How your days felt</h2><p class="hint">Plot this against the active-hours chart above. Most people are surprised by which days score well.</p>'
+      + '<div class="card">'+lineChart(marks.map(m=>+m.mark),5)+'</div></section>';
+  }
+  return h;
+}
+function ring(pct,label){
+  const r=30,c=2*Math.PI*r;
+  return '<div style="text-align:center;width:92px">'
+    + '<svg viewBox="0 0 80 80" style="width:76px;height:76px">'
+    + '<circle cx="40" cy="40" r="'+r+'" fill="none" stroke="var(--panel-2)" stroke-width="9"/>'
+    + '<circle cx="40" cy="40" r="'+r+'" fill="none" stroke="var(--brass)" stroke-width="9" stroke-linecap="round"'
+    + ' stroke-dasharray="'+(c*pct/100)+' '+c+'" transform="rotate(-90 40 40)"/>'
+    + '<text x="40" y="45" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor">'+pct+'</text></svg>'
+    + '<div style="font-size:12px;color:var(--muted);margin-top:2px">'+esc(label)+'</div></div>';
+}
+function stackChart(weeks){
+  const max=Math.max(1,...weeks.map(w=>w.a+w.p));
+  const W=560,H=150,bw=W/weeks.length;
+  let s='<svg class="chart" viewBox="0 0 '+W+' '+(H+22)+'">';
+  weeks.forEach((w,i)=>{
+    const x=i*bw+bw*.2, wd=bw*.6;
+    const ph=(w.p/max)*H, ah=(w.a/max)*H;
+    s+='<rect x="'+x+'" y="'+(H-ph)+'" width="'+wd+'" height="'+ph+'" fill="var(--line)" rx="2"/>';
+    s+='<rect x="'+x+'" y="'+(H-ph-ah)+'" width="'+wd+'" height="'+ah+'" fill="var(--brass)" rx="2"/>';
+    s+='<text x="'+(x+wd/2)+'" y="'+(H+15)+'" text-anchor="middle" font-size="10" fill="var(--muted)">'+esc(w.label)+'</text>';
+  });
+  s+='</svg><div class="legend"><span><i style="background:var(--brass)"></i>Active</span>'
+    +'<span><i style="background:var(--line)"></i>Passive</span></div>';
+  return s;
+}
+function lineChart(vals,forceMax){
+  const max=Math.max(1,forceMax||Math.max(...vals));
+  const W=560,H=130;
+  const pts=vals.map((v,i)=>[(i/(Math.max(1,vals.length-1)))*W, H-(v/max)*H]);
+  const d=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  return '<svg class="chart" viewBox="0 0 '+W+' '+(H+4)+'">'
+    + '<path d="'+d+'" fill="none" stroke="var(--brass)" stroke-width="2.5" stroke-linejoin="round"/>'
+    + '<circle cx="'+pts[pts.length-1][0]+'" cy="'+pts[pts.length-1][1]+'" r="4" fill="var(--brass)"/>'
+    + '</svg><p class="hint" style="margin:6px 0 0">Latest: '+vals[vals.length-1]+'</p>';
+}
+
+/* ---------------------------------------------------------- form helpers */
+function fld(l,c){ return '<div class="f"><label>'+l+'</label>'+c+'</div>'; }
+function sel(n,opts,def){ return '<select name="'+n+'">'+opts.map(o=>'<option'+(o===def?" selected":"")+'>'+esc(o)+'</option>').join("")+'</select>'; }
+function restoreFilters(){
+  const q=document.getElementById("fq"); if(!q) return;
+  q.value=filters.q; document.getElementById("fp").value=filters.paper; document.getElementById("fs").value=filters.state;
+}
+
+/* ---------------------------------------------------------- events */
+document.getElementById("nav").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-v]"); if(!b) return;
+  view=b.dataset.v; if(view!=="quiz") quiz=null; render();
+});
+
+document.body.addEventListener("click", async e=>{
+  const b=e.target.closest("[data-act]"); if(!b) return;
+  const act=b.dataset.act;
+
+  if(act==="signin"){ try{ await signInWithPopup(getAuth(), new GoogleAuthProvider()); }catch(err){ note("Sign-in failed.",true);} return; }
+  if(act==="signout"){ await signOut(getAuth()); return; }
+
+  if(act==="cell"){
+    const [p,s,t]=b.dataset.key.split("||");
+    const cur=topicFor(p,s,t);
+    const idx=STATES.findIndex(x=>x[0]===(cur&&cur.state));
+    const next=STATES[(idx+1)%(STATES.length+1)];
+    if(!next){ if(cur) await drop(cur.id); return; }
+    const rec = cur ? {...cur} : {id:uid(),type:"topic",paper:p,subject:s,topic:t,done:[false,false,false,false]};
+    rec.state=next[0];
+    if(next[0]==="reading" && !rec.started) rec.started=iso(today0());
+    if(next[0]==="revised") rec.done=[true,true,true,true];
+    await put(rec); return;
+  }
+  if(act==="mark"||act==="toggle"){
+    const t=one(b.dataset.id); if(!t) return;
+    const i=+b.dataset.i, done=Array.isArray(t.done)?t.done.slice():[false,false,false,false];
+    done[i]= act==="mark" ? true : !done[i];
+    const rec={...t,done}; if(done.every(Boolean)) rec.state="revised";
+    await put(rec); return;
+  }
+  if(act==="markmag"||act==="togglemag"){
+    const m=one(b.dataset.id); if(!m) return;
+    const i=+b.dataset.i, done=Array.isArray(m.done)?m.done.slice():[false,false];
+    done[i]= act==="markmag" ? true : !done[i];
+    await put({...m,done}); return;
+  }
+  if(act==="del"){ if(confirm("Delete this entry permanently?")) await drop(b.dataset.id); return; }
+  if(act==="editday"){ const d=one(b.dataset.id); if(!d) return;
+    view="daily"; render();
+    document.getElementById("main").insertAdjacentHTML("afterbegin",
+      '<div class="card" style="margin-bottom:12px"><h2>Editing '+fmt(parseD(d.date))+'</h2>'+dayForm(d)+'</div>');
+    window.scrollTo({top:0}); return; }
+  if(act==="edittopic"){
+    const t=one(b.dataset.id); if(!t) return;
+    const s=prompt("State — reading / notes / revised / hidden:", t.state);
+    if(s && STATES.some(x=>x[0]===s)) { const st=prompt("Date started (YYYY-MM-DD):",t.started)||t.started;
+      await put({...t,state:s,started:st}); }
+    return; }
+  if(act==="editmag"){
+    const m=one(b.dataset.id); if(!m) return;
+    const end=prompt("End date (YYYY-MM-DD) — leave blank if still reading:", m.end||"");
+    await put({...m, end: end? end.trim():""}); return; }
+  if(act==="qshow"){ quiz.shown=true; render(); return; }
+  if(act==="qmark"){
+    const ok=b.dataset.ok==="1", q=quiz.list[quiz.i];
+    quiz.results[quiz.i]=ok; quiz.i++; quiz.shown=false;
+    await put({id:uid(),type:"qlog",qid:q.id,ok,date:iso(today0())});
+    return; }
+  if(act==="quizmore"){ quiz={list:pickQuestions(),i:0,shown:false,results:[]}; render(); return; }
+});
+
+document.body.addEventListener("input",e=>{
+  if(e.target.id==="fq"){ filters.q=e.target.value; softRender("fq"); }
+});
+document.body.addEventListener("change",e=>{
+  if(e.target.id==="fp"){ filters.paper=e.target.value; render(); }
+  if(e.target.id==="fs"){ filters.state=e.target.value; render(); }
+});
+function softRender(focusId){
+  const pos=document.activeElement&&document.activeElement.selectionStart;
+  render();
+  const el=document.getElementById(focusId);
+  if(el){ el.focus(); try{ el.setSelectionRange(pos,pos); }catch(e){} }
+}
+
+document.body.addEventListener("submit", async e=>{
+  const f=e.target.closest("form[data-form]"); if(!f) return;
+  e.preventDefault();
+  const d=Object.fromEntries(new FormData(f).entries());
+  const kind=f.dataset.form;
+
+  if(kind==="day"){
+    const labels=["Slot 1 — GS","Slot 2 — Optional","Slot 3 — CA / answers / revision"];
+    const slots=[0,1,2].map(i=>({label:labels[i],text:(d["s"+i]||"").trim(),hrs:d["h"+i]||"",mode:d["m"+i]||"passive"}));
+    const existing = d.id? one(d.id) : all("day").find(x=>x.date===d.date);
+    await put({id: existing?existing.id:uid(), type:"day", date:d.date, slots, mark:+d.mark||0, note:(d.note||"").trim()});
+    note("Day saved.");
+  }
+  if(kind==="week"){
+    const existing = d.id? one(d.id) : all("week").find(w=>w.weekStart===d.weekStart);
+    await put({id: existing?existing.id:uid(), type:"week", weekStart:d.weekStart, mark:+d.mark||0, note:(d.note||"").trim()});
+    const s=one("settings")||{id:"settings",type:"settings"};
+    await put({...s, answerTarget:+d.target||14});
+  }
+  if(kind==="answer"){
+    await put({id:uid(),type:"answer",date:d.date,paper:d.paper,topic:(d.topic||"").trim(),
+      mins:d.mins,score:d.score,flaw:(d.flaw||"").trim()});
+  }
+  if(kind==="mag"){
+    if(!(d.name||"").trim()) return;
+    await put({id:uid(),type:"mag",name:d.name.trim(),subject:(d.subject||"").trim(),
+      month:(d.month||"").trim(),start:d.start,end:d.end||"",done:[false,false]});
+  }
+  f.reset(); render();
+});
+
+/* ---------------------------------------------------------- boot */
+function subscribe(){
+  onSnapshot(collection(db,"users",user.uid,"items"), snap=>{
+    const next={}; snap.forEach(dd=>{ next[dd.id]=Object.assign({id:dd.id},dd.data()); });
+    items=next; whoLine(); render();
+  }, ()=>{ note("Lost connection to your data.",true); });
+}
+(async function boot(){
+  try{
+    if(!window.SYLLABUS||!window.QUESTIONS) throw new Error("Data did not load.");
+    render();
+    const cfg=window.FIREBASE_CONFIG;
+    if(cfg && cfg.apiKey && cfg.projectId){
+      try{
+        await loadFirebase();
+        cloud=true;
+        const app=initializeApp(cfg); db=getFirestore(app);
+        onAuthStateChanged(getAuth(app), u=>{
+          user=u||null;
+          if(user) subscribe(); else { items={}; whoLine(); render(); }
+        });
+      }catch(err){ cloud=false; localLoad(); render(); }
+    } else { localLoad(); render(); }
+    whoLine();
+  }catch(err){
+    document.getElementById("main").innerHTML =
+      '<div class="empty"><strong>Something went wrong starting up</strong>'+String(err.message)+'</div>';
+    document.getElementById("who").textContent="";
+  }
+})();
+</script>
+</body>
+</html>
